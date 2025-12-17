@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bevy + Rust Teaching Slides (Topics 3–6)</title>
+    <style>
+        :root {
+            --primary-color: #3a86ff;
+            --secondary-color: #8338ec;
+            --accent-color: #ff006e;
+            --dark-color: #1a1a2e;
+            --light-color: #f8f9fa;
+            --code-bg: #2d2d2d;
+            --border-radius: 8px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark-color);
+            color: var(--light-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .slide-container {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-left: 5px solid var(--primary-color);
+        }
+        
+        .topic-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--secondary-color);
+        }
+        
+        .topic-header h1 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .topic-header h2 {
+            color: var(--secondary-color);
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+        
+        .slide-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .slide-number {
+            background-color: var(--accent-color);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .slide-title {
+            color: var(--primary-color);
+            font-size: 1.6rem;
+        }
+        
+        .content-section {
+            margin-bottom: 25px;
+        }
+        
+        .content-section h3 {
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        ul, ol {
+            padding-left: 25px;
+            margin-bottom: 20px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        .code-block {
+            background-color: var(--code-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .code-block code {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1rem;
+            color: #f8f9fa;
+            line-height: 1.5;
+        }
+        
+        .code-comment {
+            color: #6a9955;
+        }
+        
+        .code-keyword {
+            color: #569cd6;
+        }
+        
+        .code-string {
+            color: #ce9178;
+        }
+        
+        .code-function {
+            color: #dcdcaa;
+        }
+        
+        .code-type {
+            color: #4ec9b0;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .comparison-table th, .comparison-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .comparison-table th {
+            background-color: rgba(58, 134, 255, 0.2);
+            color: var(--primary-color);
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .nav-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .nav-button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .nav-button:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .slide-index {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.1rem;
+            color: #aaa;
+        }
+        
+        .diagram-box {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .entity-diagram {
+            display: inline-block;
+            text-align: left;
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: var(--border-radius);
+        }
+        
+        .note-box {
+            background-color: rgba(255, 215, 0, 0.1);
+            border-left: 4px solid gold;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .slide-container {
+                padding: 20px;
+            }
+            
+            .topic-header h1 {
+                font-size: 2rem;
+            }
+            
+            .topic-header h2 {
+                font-size: 1.5rem;
+            }
+            
+            .slide-title {
+                font-size: 1.4rem;
+            }
+            
+            .code-block {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Topic Header -->
+        <div class="topic-header">
+            <h1>Bevy Framework with Rust</h1>
+            <h2>Teaching Slides (Topics 3–6)</h2>
+            <p>Entity-Component-System, Coordinate Systems, Viewing Pipeline, and Camera Models</p>
+        </div>
+        
+        <!-- Slide Navigation -->
+        <div class="nav-buttons">
+            <button class="nav-button" id="prevBtn" onclick="prevSlide()">Previous Slide</button>
+            <button class="nav-button" id="nextBtn" onclick="nextSlide()">Next Slide</button>
+        </div>
+        
+        <!-- Slide 3.1 -->
+        <div class="slide-container" id="slide3-1">
+            <div class="slide-header">
+                <div class="slide-number">3.1</div>
+                <h2 class="slide-title">Why ECS?</h2>
+            </div>
+            
+            <div class="content-section">
+                <h3>Traditional OOP vs Data-Oriented Design</h3>
+                <ul>
+                    <li><strong>Traditional OOP:</strong> Focuses on objects with both data and behavior</li>
+                    <li><strong>Data-Oriented Design:</strong> Separates data from behavior for better performance</li>
+                </ul>
+            </div>
+            
+            <div class="content-section">
+                <h3>Problems with Deep Inheritance in Games</h3>
+                <ul>
+                    <li>Complex class hierarchies become difficult to maintain</li>
+                    <li>Rigid structure limits flexibility for game entities</li>
+                    <li>Performance overhead from virtual function calls</li>
+                    <li>Code reuse issues (diamond problem)</li>
+                </ul>
+            </div>
+            
+            <div class="content-section">
+                <h3>ECS Advantages</h3>
+                <ul>
+                    <li><strong>Data + Behavior Separation:</strong> Components hold data, systems implement behavior</li>
+                    <li><strong>Better Cache Efficiency:</strong> Data is laid out contiguously in memory</li>
+                    <li><strong>Parallelism:</strong> Systems can run in parallel on different components</li>
+                    <li><strong>Flexibility:</strong> Easily add/remove components from entities</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Slide 3.2 -->
+        <div class="slide-container" id="slide3-2" style="display: none;">
+            <div class="slide-header">
+                <div class="slide-number">3.2</div>
+                <h2 class="slide-title">ECS Core Concepts</h2>
+            </div>
+            
+            <div class="content-section">
+                <h3>Entity</h3>
+                <ul>
+                    <li>Unique identifier (ID) with no data of its own</li>
+                    <li>Acts as a "container" for components</li>
+                    <li>Lightweight - just an ID</li>
+                </ul>
+            </div>
+            
+            <div class="content-section">
+                <h3>Component</h3>
+                <ul>
+                    <li>Pure data structs (no behavior)</li>
+                    <li>Examples: Position, Velocity, Health, Sprite</li>
+                    <li>Attached to entities to give them properties</li>
+                </ul>
+            </div>
+            
+            <div class="content-section">
+                <h3>System</h3>
+                <ul>
+                    <li>Logic that operates on components</li>
+                    <li>Processes entities with specific component combinations</li>
+                    <li>Examples: movement system, rendering system, collision detection</li>
+                </ul>
+            </div>
+            
+            <div class="content-section">
+                <h3>Resource</h3>
+                <ul>
+                    <li>Global shared data</li>
+                    <li>Not attached to specific entities</li>
+                    <li>Examples: Time, Input state, Asset collections</li>
+                </ul>
+            </div>
+            
+            <div class="note-box">
+                <strong>ECS = Data + Queries + Systems</strong>
+            </div>
+        </div>
+        
+        <!-- Slide 3.3 -->
+        <div class="slide-container" id="slide3-3" style="display: none;">
+            <div class="slide-header">
+                <div class="slide-number">3.3</div>
+                <h2 class="slide-title">ECS Mapping to Graphics</h2>
+            </div>
+            
+            <div class="content-section">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>ECS Concept</th>
+                            <th>Graphics Equivalent</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Entity</strong></td>
+                            <td>Object in the scene</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Component</strong></td>
+                            <td>Transform, Mesh, Material properties</td>
+                        </tr>
+                        <tr>
+                            <td><strong>System</strong></td>
+                            <td>Movement, Rendering, Camera control logic</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Resource</strong></td>
+                            <td>Time, Input, Asset managers</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="content-section">
+                <h3>Example: A 3D Model in Scene</h3>
+                <div class="entity-diagram">
+                    <strong>Entity: PlayerCharacter</strong><br>
+                    ├── <strong>Transform</strong> Component: position, rotation, scale<br>
+                    ├── <strong>Mesh</strong> Component: 3D geometry data<br>
+                    ├── <strong>Material</strong> Component: color, texture, shader properties<br>
+                    └── <strong>Health</strong> Component: current/max health values
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 3.4 -->
+        <div class="slide-container" id="slide3-4" style="display: none;">
+            <div class="slide-header">
+                <div class="slide-number">3.4</div>
+                <h2 class="slide-title">Simple ECS Example (Conceptual)</h2>
+            </div>
+            
+            <div class="content-section">
+                <h3>Entity Structure</h3>
+                <div class="diagram-box">
+                    <div style="font-family: monospace; font-size: 1.1rem;">
+                        <strong>Entity (ID: 42)</strong><br>
+                        ▼ Transform { x: 0.0, y: 0.0, z: 0.0 }<br>
+                        ▼ Mesh { vertices: [...], indices: [...] }<br>
+                        ▼ Material { color: Color::BLUE, texture: None }
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content-section">
+                <h3>System: render_system()</h3>
+                <div class="code-block">
+                    <code>
+<span class="code-keyword">fn</span> <span class="code-function">render_system</span>(
+    <span class="code-comment">// Query all entities with Transform, Mesh, and Material components</span>
+    <span class="code-keyword">mut</span> query: Query<(&Transform, &Mesh, &Material)>
+) {
+    <span class="code-keyword">for</span> (transform, mesh, material) <span class="code-keyword">in</span> query.<span class="code-function">iter_mut</span>() {
+        <span class="code-comment">// Render logic here</span>
+        <span class="code-function">draw_mesh</span>(mesh, transform, material);
+    }
+}
+                    </code>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 4.1 -->
+        <div class="slide-container" id="slide4-1" style="display: none;">
+            <div class="slide-header">
+                <div class="slide-number">4.1</div>
+                <h2 class="slide-title">Coordinate Systems in Computer Graphics</h2>
+            </div>
+            
+            <div class="content-section">
+                <h3>Transformation Pipeline</h3>
+                <ol>
+                    <li><strong>Object (Local) Space:</strong> Coordinates relative to object's origin</li>
+                    <li><strong>World Space:</strong> Coordinates in the global scene</li>
+                    <li><strong>View (Camera) Space:</strong> Coordinates relative to camera</li>
+                    <li><strong>Clip Space:</strong> Normalized device coordinates (-1 to 1)</li>
+                    <li><strong>Screen Space:</strong> Pixel coordinates on display</li>
+                </ol>
+            </div>
+            
+            <div class="note-box">
+                <strong>Note:</strong> Bevy manages most coordinate conversions internally, so developers focus on game logic.
+            </div>
+        </div>
+        
+        <!-- Slide 4.2 -->
+        <div class="slide-container" id="slide4-2" style="display: none;">
+            <div class="slide-header">
+                <div class="slide-number">4.2</div>
+                <h2 class="slide-title">Bevy Coordinate System</h2>
+            </div>
+            
+            <div class="content-section">
+                <h3>Right-Handed Coordinate System</h3>
+                <div class="diagram-box">
+                    <div style="text-align: center; font-size: 1.2rem;">
+                        X → Right<br>
+                        Y → Up<br>
+                        Z → Forward (out of screen)
+                    </div>
+                </div>
+                
+                <p>This is the standard in computer graphics and mathematics.</p>
+            </div>
+            
+            <div class="content-section">
+                <h3>Visual Representation</h3>
+                <p>Imagine looking at your screen:</p>
+                <ul>
+                    <li><strong>X-axis:</strong> Positive to the right, negative to the left</li>
+                    <li><strong>Y-axis:</strong> Positive upward, negative downward</li>
+                    <li><strong>Z-axis:</strong> Positive coming out of screen toward you, negative going into screen</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Slide 4.3 -->
+        <div class="slide-container" id="slide4-3" style="display: none;">
+            <div class="slide-header">
+                <div class="slide-number">4.3</div>
+                <h2 class="slide-title">Transform Components</h2>
+            </div>
+            
+            <div class="content-section">
+                <h3>Transform Struct</h3>
+                <div class="code-block">
+                    <code>
+<span class="code-keyword">pub struct</span> <span class="code-type">Transform</span> {
+    <span class="code-keyword">pub</span> translation: <span class="code-type">Vec3</span>,
+    <span class="code-keyword">pub</span> rotation: <span class="code-type">Quat</span>,
+    <span class="code-keyword">pub</span> scale: <span class="code-type">Vec3</span>,
+}
+                    </code>
+                </div>
+                
+                <ul>
+                    <li><strong>translation:</strong> Position in world space (x, y, z)</li>
+                    <li><strong>rotation:</strong> Orientation (represented as a quaternion)</li>
+                    <li><strong>scale:</strong> Size multiplier along each axis</li>
+                </ul>
+            </div>
+            
+            <div class="content-section">
+                <h3>GlobalTransform</h3>
+                <ul>
+                    <li>Automatically computed from local Transform and hierarchy</li>
+                    <li>Represents absolute position in world space</li>
+                    <li>Used for rendering and physics</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Slide 4.4 -->
+        <div class="slide-container" id="slide4-4" style="display: none;">
+            <div class="slide-header">
+                <div class="slide-number">4.4</div>
+                <h2 class="slide-title">Parent-Child Transforms</h2>
+            </div>
+            
+            <div class="content-section">
+                <h3>Scene Hierarchy</h3>
+                <ul>
+                    <li>Entities can have parent-child relationships</li>
+                    <li>Child's local transform is relative to its parent</li>
+                    <li>Changes to parent affect all children</li>
+                </ul>
+            </div>
+            
+            <div class="content-section">
+                <h3>Example: Robot Arm</h3>
+                <div class="entity-diagram">
+                    <strong>Entity: RobotBase</strong><br>
+                    ├── Transform: position (0, 0, 0)<br>
+                    └── <strong>Child: UpperArm</strong><br>
+                        ├── Transform: position (0, 1, 0) <em>// relative to base</em><br>
+                        └── <strong>Child: Forearm</strong><br>
+                            └── Transform: position (0, 1, 0) <em>// relative to upper arm</em>
+                </div>
+            </div>
+            
+            <div class="note-box">
+                <strong>Automatic Computation:</strong> Bevy automatically computes GlobalTransform from the hierarchy, so when RobotBase moves, all child parts move with it.
+            </div>
+        </div>
+        
+        <!-- Slide 5.1 -->
+        <div class="slide-container" id="slide5-1" style="display: none;">
+            <div class="slide-header">
+                <div class="slide-number">5.1</div>
+                <h2 class="slide-title">Classical Viewing Pipeline</h2>
+            </div>
+            
+            <div class="content-section">
+                <h3>Graphics Pipeline Stages</h3>
+                <ol>
+                    <li><strong>Model Space:</strong> Object's local coordinates</li>
+                    <li><strong>World Space:</strong> Scene coordinates after model transformation</li>
+                    <li><strong>View Space:</strong> Camera-relative coordinates</li>
+                    <li><strong>Clip Space:</strong> Normalized coordinates after projection</li>
+                    <li><strong>NDC (Normalized Device Coordinates):</strong> Homogeneous division</li>
+                    <li><strong>Screen Space:</strong> Window pixel coordinates</li>
+                </ol>
+            </div>
+            
+            <div class="content-section">
+                <h3>Visual Flow</h3>
+                <div class="diagram-box">
+                    Model Space → World Space → View Space → Clip Space → NDC → Screen Space
+                </div>
+                <p>Each stage applies a transformation matrix to the vertices.</p>
+            </div>
+        </div>
+        
+        <!-- Slide 5.2 -->
+        <div class="slide-container" id="slide5-2" style="display: none;">
+            <div class="slide-header">
+                <div class="slide-number">5.2</div>
+                <h2 class="slide-title">Viewing Pipeline in Bevy</h2>
+            </div>
+            
+            <div class="content-section">
+                <h3>Bevy's Implementation</h3>
+                <ul>
+                    <li><strong>Mesh</strong> → Model Space (vertex data)</li>
+                    <li><strong>[Transform]</strong> → World Space (position in scene)</li>
+                    <li><strong>Camera</strong> → View Space (camera-relative)</li>
+                    <li><strong>GPU</strong> → Clip & NDC (projection and normalization)</li>
+                    <li><strong>Window</strong> → Screen Space (pixel coordinates)</li>
+                </ul>
+            </div>
+            
+            <div class="content-section">
+                <h3>Developer Control Points</h3>
+                <p>Developers primarily control:</p>
+                <ul>
+                    <li>Camera properties (position, rotation, projection)</li>
+                    <li>Entity transforms (position in world)</li>
+                    <li>Window size and resolution</li>
+                </ul>
+                <p>Bevy handles the matrix calculations internally.</p>
+            </div>
+        </div>
+        
+        <!-- Slide 5.3 -->
+        <div class="slide-container" id="slide5-3" style="display: none;">
+            <div class="slide-header">
+                <div class="slide-number">5.3</div>
+                <h2 class="slide-title">Moving the Camera vs World</h2>
+            </div>
+            
+            <div class="content-section">
+                <h3>Key Concept</h3>
+                <p><strong>Camera movement = inverse world transform</strong></p>
+                <p>When you move the camera to the right, it's equivalent to moving the entire world to the left.</p>
+            </div>
+            
+            <div class="content-section">
+                <h3>Common Beginner Confusion</h3>
+                <ul>
+                    <li>Beginners often think: "I want to see what's to the right, so I'll move camera right"</li>
+                    <li>Reality: To see what's to the right, you either:
+                        <ul>
+                            <li>Move camera left (so world appears to move right)</li>
+                            <li>Or rotate camera to look right</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="note-box">
+                <strong>Good news:</strong> Bevy handles the inverse matrices internally. You just position the camera where you want it in the world, and Bevy computes the correct view matrix.
+            </div>
+        </div>
+        
+        <!-- Slide 6.1 -->
+        <div class="slide-container" id="slide6-1" style="display: none;">
+            <div class="slide-header">
+                <div class="slide-number">6.1</div>
+                <h2 class="slide-title">Camera as an Entity</h2>
+            </div>
+            
+            <div class="content-section">
+                <h3>Camera in ECS</h3>
+                <ul>
+                    <li>Camera is just another ECS entity</li>
+                    <li>Uses <strong>[Camera2d]</strong> or <strong>[Camera3d]</strong> component</li>
+                    <li>Has its own <strong>Transform</strong> component like any other entity</li>
+                </ul>
+            </div>
+            
+            <div class="content-section">
+                <h3>Camera Components</h3>
+                <div class="code-block">
+                    <code>
+<span class="code-comment">// Spawning a 2D camera</span>
+commands.<span class="code-function">spawn</span>((<br>
+    Camera2d,<br>
+    Transform::<span class="code-function">from_xyz</span>(0.0, 0.0, 0.0),<br>
+    GlobalTransform::<span class="code-function">default</span>(),<br>
+));
+                    </code>
+                </div>
+                
+                <p>This ECS approach allows cameras to be:
+                <ul>
+                    <li>Moved, rotated, scaled like any entity</li>
+                    <li>Parented to other entities (e.g., follow a player)</li>
+                    <li>Added/removed dynamically</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Slide 6.2 -->
+        <div class="slide-container" id="slide6-2" style="display: none;">
+            <div class="slide-header">
+                <div class="slide-number">6.2</div>
+                <h2 class="slide-title">2D Camera (Orthographic)</h2>
+            </div>
+            
+            <div class="content-section">
+                <h3>Orthographic Projection</h3>
+                <ul>
+                    <li><strong>No perspective distortion</strong> - objects don't appear smaller when far away</li>
+                    <li>Parallel projection lines</li>
+                    <li>Ideal for 2D games, UI, and technical diagrams</li>
+                </ul>
+            </div>
+            
+            <div class="content-section">
+                <h3>Creating a 2D Camera</h3>
+                <div class="code-block">
+                    <code>
+<span class="code-keyword">use</span> bevy::prelude::*;<br><br>
+<span class="code-keyword">fn</span> <span class="code-function">setup_camera</span>(<span class="code-keyword">mut</span> commands: Commands) {<br>
+    <span class="code-comment">// Spawn a default 2D camera</span><br>
+    commands.<span class="code-function">spawn</span>(Camera2dBundle::<span class="code-function">default</span>());<br>
+}
+                    </code>
+                </div>
+            </div>
+            
+            <div class="content-section">
+                <h3>Use Cases</h3>
+                <ul>
+                    <li>2D platformers and top-down games</li>
+                    <li>User interfaces (UI)</li>
+                    <li>Sprite-based games</li>
+                    <li>Tile maps</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Slide 6.3 -->
+        <div class="slide-container" id="slide6-3" style="display: none;">
+            <div class="slide-header">
+                <div class="slide-number">6.3</div>
+                <h2 class="slide-title">3D Camera (Perspective)</h2>
+            </div>
+            
+            <div class="content-section">
+                <h3>Perspective Projection</h3>
+                <ul>
+                    <li><strong>Depth perception</strong> - objects appear smaller when farther away</li>
+                    <li>Converging projection lines (like human vision)</li>
+                    <li>Used for realistic 3D scenes</li>
+                </ul>
+            </div>
+            
+            <div class="content-section">
+                <h3>Field of View (FOV)</h3>
+                <p>The angular extent of the visible scene. Wider FOV = more peripheral vision.</p>
+            </div>
+            
+            <div class="content-section">
+                <h3>Creating a 3D Camera</h3>
+                <div class="code-block">
+                    <code>
+commands.<span class="code-function">spawn</span>(Camera3dBundle {<br>
+    transform: Transform::<span class="code-function">from_xyz</span>(0.0, 5.0, 10.0)<br>
+        .<span class="code-function">looking_at</span>(Vec3::ZERO, Vec3::Y),<br>
+    ..<span class="code-function">default</span>()<br>
+});
+                    </code>
+                </div>
+                <p>Positioned at (0, 5, 10) and looking at the origin (0, 0, 0).</p>
+            </div>
+        </div>
+        
+        <!-- Slide 6.4 -->
+        <div class="slide-container" id="slide6-4" style="display: none;">
+            <div class="slide-header">
+                <div class="slide-number">6.4</div>
+                <h2 class="slide-title">First-Person vs Third-Person Camera</h2>
+            </div>
+            
+            <div class="content-section">
+                <h3>First-Person Camera</h3>
+                <ul>
+                    <li>Camera follows entity position directly</li>
+                    <li>View is from entity's "eyes"</li>
+                    <li>Common in FPS games</li>
+                </ul>
+                
+                <div class="code-block" style="font-size: 0.9rem;">
+                    <code>
+<span class="code-keyword">fn</span> <span class="code-function">follow_player</span>(<br>
+    player_query: Query<&Transform, With<Player>>,<br>
+    <span class="code-keyword">mut</span> camera_query: Query<&<span class="code-keyword">mut</span> Transform, With<Camera3d>><br>
+) {<br>
+    <span class="code-keyword">if let</span> <span class="code-type">Ok</span>(player_transform) = player_query.<span class="code-function">get_single</span>() {<br>
+        <span class="code-keyword">if let</span> <span class="code-type">Ok</span>(<span class="code-keyword">mut</span> camera_transform) = camera_query.<span class="code-function">get_single_mut</span>() {<br>
+            camera_transform.translation = player_transform.translation;<br>
+            camera_transform.rotation = player_transform.rotation;<br>
+        }<br>
+    }<br>
+}
+                    </code>
+                </div>
+            </div>
+            
+            <div class="content-section">
+                <h3>Third-Person Camera</h3>
+                <ul>
+                    <li>Camera follows with an offset from entity</li>
+                    <li>Uses <code>looking_at</code> to focus on the entity</li>
+                    <li>Common in adventure and RPG games</li>
+                </ul>
+                
+                <div class="code-block" style="font-size: 0.9rem;">
+                    <code>
+<span class="code-keyword">fn</span> <span class="code-function">third_person_camera</span>(<br>
+    player_query: Query<&Transform, With<Player>>,<br>
+    <span class="code-keyword">mut</span> camera_query: Query<&<span class="code-keyword">mut</span> Transform, With<Camera3d>><br>
+) {<br>
+    <span class="code-keyword">if let</span> <span class="code-type">Ok</span>(player_transform) = player_query.<span class="code-function">get_single</span>() {<br>
+        <span class="code-keyword">if let</span> <span class="code-type">Ok</span>(<span class="code-keyword">mut</span> camera_transform) = camera_query.<span class="code-function">get_single_mut</span>() {<br>
+            <span class="code-comment">// Position camera behind and above player</span><br>
+            camera_transform.translation = player_transform.translation<br>
+                + player_transform.back() * 5.0<br>
+                + Vec3::Y * 2.0;<br>
+            camera_transform.<span class="code-function">look_at</span>(player_transform.translation, Vec3::Y);<br>
+        }<br>
+    }<br>
+}
+                    </code>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 6.5 -->
+        <div class="slide-container" id="slide6-5" style="display: none;">
+            <div class="slide-header">
+                <div class="slide-number">6.5</div>
+                <h2 class="slide-title">Minimal Bevy Example (Complete Program)</h2>
+            </div>
+            
+            <div class="content-section">
+                <h3>Complete Bevy Program</h3>
+                <div class="code-block">
+                    <code>
+<span class="code-keyword">use</span> bevy::prelude::*;<br><br>
+<span class="code-keyword">fn</span> <span class="code-function">main</span>() {<br>
+    App::<span class="code-function">new</span>()<br>
+        .<span class="code-function">add_plugins</span>(DefaultPlugins)<br>
+        .<span class="code-function">add_systems</span>(Startup, setup)<br>
+        .<span class="code-function">add_systems</span>(Update, rotate_cube)<br>
+        .<span class="code-function">run</span>();<br>
+}<br><br>
+<span class="code-keyword">fn</span> <span class="code-function">setup</span>(<br>
+    <span class="code-keyword">mut</span> commands: Commands,<br>
+    <span class="code-keyword">mut</span> meshes: ResMut&lt;Assets&lt;Mesh&gt;&gt;,<br>
+    <span class="code-keyword">mut</span> materials: ResMut&lt;Assets&lt;StandardMaterial&gt;&gt;,<br>
+) {<br>
+    <span class="code-comment">// Cube entity</span><br>
+    commands.<span class="code-function">spawn</span>(PbrBundle {<br>
+        mesh: meshes.<span class="code-function">add</span>(Mesh::<span class="code-function">from</span>(Cuboid::<span class="code-function">new</span>(1.0, 1.0, 1.0))),<br>
+        material: materials.<span class="code-function">add</span>(StandardMaterial {<br>
+            base_color: Color::BLUE,<br>
+            ..<span class="code-function">default</span>()<br>
+        }),<br>
+        transform: Transform::<span class="code-function">from_xyz</span>(0.0, 0.0, 0.0),<br>
+        ..<span class="code-function">default</span>()<br>
+    });<br><br>
+    <span class="code-comment">// Light</span><br>
+    commands.<span class="code-function">spawn</span>(PointLightBundle {<br>
+        point_light: PointLight {<br>
+            intensity: 1500.0,<br>
+            ..<span class="code-function">default</span>()<br>
+        },<br>
+        transform: Transform::<span class="code-function">from_xyz</span>(4.0, 8.0, 4.0),<br>
+        ..<span class="code-function">default</span>()<br>
+    });<br><br>
+    <span class="code-comment">// Camera</span><br>
+    commands.<span class="code-function">spawn</span>(Camera3dBundle {<br>
+        transform: Transform::<span class="code-function">from_xyz</span>(0.0, 3.0, 8.0)<br>
+            .<span class="code-function">looking_at</span>(Vec3::ZERO, Vec3::Y),<br>
+        ..<span class="code-function">default</span>()<br>
+    });<br>
+}<br><br>
+<span class="code-keyword">fn</span> <span class="code-function">rotate_cube</span>(<br>
+    time: Res&lt;Time&gt;,<br>
+    <span class="code-keyword">mut</span> query: Query&lt;&<span class="code-keyword">mut</span> Transform, With&lt;Handle&lt;Mesh&gt;&gt;&gt;,<br>
+) {<br>
+    <span class="code-keyword">for</span> <span class="code-keyword">mut</span> transform <span class="code-keyword">in</span> query.<span class="code-function">iter_mut</span>() {<br>
+        transform.<span class="code-function">rotate_y</span>(time.delta_seconds());<br>
+    }<br>
+}
+                    </code>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 6.6 -->
+        <div class="slide-container" id="slide6-6" style="display: none;">
+            <div class="slide-header">
+                <div class="slide-number">6.6</div>
+                <h2 class="slide-title">What This Program Demonstrates</h2>
+            </div>
+            
+            <div class="content-section">
+                <ul>
+                    <li><strong>ECS architecture:</strong> Entities, components, systems, resources</li>
+                    <li><strong>World and local transforms:</strong> Positioning objects in 3D space</li>
+                    <li><strong>Perspective camera:</strong> 3D viewing with depth perception</li>
+                    <li><strong>Viewing pipeline abstraction:</strong> Bevy handles coordinate transformations</li>
+                    <li><strong>Real-time system updates:</strong> Game loop with delta time</li>
+                </ul>
+            </div>
+            
+            <div class="content-section">
+                <h3>Program Output</h3>
+                <p>When run, this program displays:</p>
+                <ul>
+                    <li>A blue cube at the center of the world</li>
+                    <li>A light source illuminating the cube</li>
+                    <li>A camera positioned to view the cube</li>
+                    <li>The cube rotating smoothly around the Y-axis</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Slide 6.7 -->
+        <div class="slide-container" id="slide6-7" style="display: none;">
+            <div class="slide-header">
+                <div class="slide-number">6.7</div>
+                <h2 class="slide-title">Theory Mapping</h2>
+            </div>
+            
+            <div class="content-section">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Graphics Theory</th>
+                            <th>Bevy Concept</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Model Space</strong></td>
+                            <td>Mesh + Transform components</td>
+                        </tr>
+                        <tr>
+                            <td><strong>World Space</strong></td>
+                            <td>GlobalTransform component</td>
+                        </tr>
+                        <tr>
+                            <td><strong>View Space</strong></td>
+                            <td>Camera Transform component</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Projection</strong></td>
+                            <td>Camera3dBundle (perspective projection)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Lighting Model</strong></td>
+                            <td>PointLightBundle + StandardMaterial</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Rendering Pipeline</strong></td>
+                            <td>PbrBundle (Physically Based Rendering)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="note-box">
+                <p><strong>Key Insight:</strong> Bevy provides high-level abstractions that map directly to computer graphics theory, making it easier to implement complex 3D scenes without dealing with low-level GPU programming.</p>
+            </div>
+        </div>
+        
+        <!-- Slide 6.8 -->
+        <div class="slide-container" id="slide6-8" style="display: none;">
+            <div class="slide-header">
+                <div class="slide-number">6.8</div>
+                <h2 class="slide-title">Learning Outcomes</h2>
+            </div>
+            
+            <div class="content-section">
+                <p>After completing topics 3–6, students should be able to:</p>
+                
+                <h3>1. Explain ECS Architecture</h3>
+                <ul>
+                    <li>Define entities, components, systems, and resources</li>
+                    <li>Explain advantages of ECS over traditional OOP for games</li>
+                    <li>Describe how Bevy implements ECS</li>
+                </ul>
+                
+                <h3>2. Describe Coordinate Transformations</h3>
+                <ul>
+                    <li>List the stages of the graphics pipeline</li>
+                    <li>Explain local vs world vs view space</li>
+                    <li>Understand Bevy's right-handed coordinate system</li>
+                </ul>
+                
+                <h3>3. Set Up Cameras in Bevy</h3>
+                <ul>
+                    <li>Create 2D (orthographic) and 3D (perspective) cameras</li>
+                    <li>Position and orient cameras in the scene</li>
+                    <li>Implement first-person and third-person camera controls</li>
+                </ul>
+                
+                <h3>4. Relate Theory to Implementation</h3>
+                <ul>
+                    <li>Map graphics theory concepts to Bevy abstractions</li>
+                    <li>Understand how Bevy abstracts the viewing pipeline</li>
+                    <li>Write complete Bevy programs that demonstrate 3D graphics principles</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Final Navigation -->
+        <div class="nav-buttons">
+            <button class="nav-button" id="prevBtnBottom" onclick="prevSlide()">Previous Slide</button>
+            <button class="nav-button" id="nextBtnBottom" onclick="nextSlide()">Next Slide</button>
+        </div>
+        
+        <div class="slide-index" id="slideCounter">Slide 1 of 17</div>
+    </div>
+
+    <script>
+        // Slide management
+        const slides = [
+            'slide3-1', 'slide3-2', 'slide3-3', 'slide3-4',
+            'slide4-1', 'slide4-2', 'slide4-3', 'slide4-4',
+            'slide5-1', 'slide5-2', 'slide5-3',
+            'slide6-1', 'slide6-2', 'slide6-3', 'slide6-4',
+            'slide6-5', 'slide6-6', 'slide6-7', 'slide6-8'
+        ];
+        
+        let currentSlideIndex = 0;
+        
+        function showSlide(index) {
+            // Hide all slides
+            slides.forEach(slideId => {
+                const slide = document.getElementById(slideId);
+                if (slide) {
+                    slide.style.display = 'none';
+                }
+            });
+            
+            // Show the requested slide
+            if (index >= 0 && index < slides.length) {
+                const slide = document.getElementById(slides[index]);
+                if (slide) {
+                    slide.style.display = 'block';
+                    currentSlideIndex = index;
+                    
+                    // Update slide counter
+                    document.getElementById('slideCounter').textContent = `Slide ${index + 1} of ${slides.length}`;
+                    
+                    // Update button states
+                    document.getElementById('prevBtn').disabled = index === 0;
+                    document.getElementById('prevBtnBottom').disabled = index === 0;
+                    document.getElementById('nextBtn').disabled = index === slides.length - 1;
+                    document.getElementById('nextBtnBottom').disabled = index === slides.length - 1;
+                    
+                    // Scroll to top of slide
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            }
+        }
+        
+        function nextSlide() {
+            if (currentSlideIndex < slides.length - 1) {
+                showSlide(currentSlideIndex + 1);
+            }
+        }
+        
+        function prevSlide() {
+            if (currentSlideIndex > 0) {
+                showSlide(currentSlideIndex - 1);
+            }
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            } else if (e.key === 'Home') {
+                showSlide(0);
+            } else if (e.key === 'End') {
+                showSlide(slides.length - 1);
+            }
+        });
+        
+        // Initialize by showing first slide
+        document.addEventListener('DOMContentLoaded', () => {
+            showSlide(0);
+        });
+    </script>
+</body>
+</html>
