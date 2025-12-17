@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rust Syntax: : vs :: in Bevy Code</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            color: #e6e6e6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 25px 0;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #ff6b6b;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            color: #aaa;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+        
+        .slide-container {
+            display: flex;
+            flex-direction: column;
+            background: rgba(15, 25, 35, 0.95);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            margin-bottom: 30px;
+            border: 1px solid #2c3e50;
+            min-height: 500px;
+        }
+        
+        .slide-header {
+            background: linear-gradient(90deg, #2c3e50, #34495e);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .slide-title {
+            font-size: 1.6rem;
+            font-weight: 600;
+        }
+        
+        .slide-number {
+            background: #ff6b6b;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .slide-content {
+            display: flex;
+            flex: 1;
+        }
+        
+        .explanation-column {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        
+        .code-column {
+            flex: 1;
+            padding: 30px;
+            background: rgba(20, 30, 40, 0.8);
+            border-left: 1px solid #34495e;
+            overflow-y: auto;
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #4ecdc4;
+        }
+        
+        .icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+        
+        .colon-icon {
+            background: #ff6b6b;
+        }
+        
+        .double-colon-icon {
+            background: #4ecdc4;
+        }
+        
+        .section-name {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+        
+        .content-text {
+            line-height: 1.7;
+            font-size: 1.1rem;
+        }
+        
+        .content-text p {
+            margin-bottom: 15px;
+        }
+        
+        .highlight {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+        
+        .highlight2 {
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+        
+        .code-block {
+            background: #1e1e2e;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            overflow-x: auto;
+            border-left: 4px solid;
+        }
+        
+        .code-block.colon-example {
+            border-left-color: #ff6b6b;
+        }
+        
+        .code-block.double-colon-example {
+            border-left-color: #4ecdc4;
+        }
+        
+        .code-line {
+            margin-bottom: 5px;
+            line-height: 1.5;
+        }
+        
+        .code-comment {
+            color: #6a9955;
+            font-style: italic;
+        }
+        
+        .code-keyword {
+            color: #569cd6;
+        }
+        
+        .code-function {
+            color: #dcdcaa;
+        }
+        
+        .code-string {
+            color: #ce9178;
+        }
+        
+        .code-number {
+            color: #b5cea8;
+        }
+        
+        .code-type {
+            color: #4ec9b0;
+        }
+        
+        .code-field {
+            color: #9cdcfe;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+        }
+        
+        .comparison-table th {
+            background-color: #2c3e50;
+            padding: 15px;
+            text-align: left;
+            font-size: 1.1rem;
+        }
+        
+        .comparison-table td {
+            padding: 15px;
+            border-bottom: 1px solid #34495e;
+        }
+        
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .colon-row {
+            background-color: rgba(255, 107, 107, 0.1);
+        }
+        
+        .double-colon-row {
+            background-color: rgba(78, 205, 196, 0.1);
+        }
+        
+        .symbol-cell {
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-align: center;
+            width: 60px;
+        }
+        
+        .nav-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #34495e;
+        }
+        
+        .nav-button {
+            background: #4ecdc4;
+            color: #0f2027;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .nav-button:hover {
+            background: #44b7af;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
+        }
+        
+        .nav-button:disabled {
+            background: #7f8c8d;
+            color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .nav-button i {
+            margin: 0 8px;
+        }
+        
+        .slide-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.1rem;
+        }
+        
+        .progress-bar {
+            width: 200px;
+            height: 8px;
+            background: #34495e;
+            border-radius: 4px;
+            margin: 0 15px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            width: 5%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .slide-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(25, 25, 35, 0.7);
+            border-radius: 10px;
+        }
+        
+        .slide-thumbnail {
+            background: #2c3e50;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            text-align: center;
+            min-width: 60px;
+        }
+        
+        .slide-thumbnail:hover {
+            background: #4ecdc4;
+            color: #0f2027;
+            transform: translateY(-5px);
+        }
+        
+        .slide-thumbnail.active {
+            background: #ff6b6b;
+            border-color: #ff5252;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .note-box {
+            background: rgba(255, 235, 59, 0.1);
+            border-left: 4px solid #ffd600;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .warning-box {
+            background: rgba(255, 107, 107, 0.1);
+            border-left: 4px solid #ff6b6b;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .tip-box {
+            background: rgba(78, 205, 196, 0.1);
+            border-left: 4px solid #4ecdc4;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 40px;
+            color: #aaa;
+            font-size: 0.9rem;
+            border-top: 1px solid #34495e;
+        }
+        
+        @media (max-width: 992px) {
+            .slide-content {
+                flex-direction: column;
+            }
+            
+            .code-column {
+                border-left: none;
+                border-top: 1px solid #34495e;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .slide-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .slide-number {
+                margin-top: 10px;
+            }
+            
+            .nav-controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .progress-bar {
+                width: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Rust Syntax: `:` vs `::` in Bevy</h1>
+            <p class="subtitle">Understanding the core Rust syntax that confuses many beginners when reading Bevy code</p>
+        </header>
+        
+        <main>
+            <!-- Slide 1 -->
+            <div class="slide-container" id="slide-1">
+                <div class="slide-header">
+                    <div class="slide-title">Understanding `:` and `::` in Rust</div>
+                    <div class="slide-number">1</div>
+                </div>
+                <div class="slide-content">
+                    <div class="explanation-column">
+                        <div class="section-title">
+                            <div class="icon colon-icon">:</div>
+                            <div class="section-name">The Question</div>
+                        </div>
+                        <div class="content-text">
+                            <p>When learning Rust and Bevy, one of the most confusing syntax elements for beginners is the difference between <span class="highlight">:</span> and <span class="highlight2">::</span>.</p>
+                            
+                            <div class="note-box">
+                                <p><strong>Excellent question!</strong> This is <strong>core Rust syntax</strong>, and understanding it will help a LOT when reading Bevy code.</p>
+                            </div>
+                            
+                            <p>We'll explain <span class="highlight">:</span> and <span class="highlight2">::</span> slowly and precisely, using real Bevy code examples.</p>
+                        </div>
+                    </div>
+                    <div class="code-column">
+                        <div class="section-title">
+                            <div class="icon double-colon-icon">::</div>
+                            <div class="section-name">The Code We're Explaining</div>
+                        </div>
+                        <div class="code-block">
+                            <div class="code-line"><span class="code-field">material</span>: <span class="code-function">materials.add</span>(<span class="code-type">StandardMaterial</span> {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">base_color</span>: <span class="code-type">Color</span>::<span class="code-function">srgb</span>(<span class="code-number">0.8</span>, <span class="code-number">0.7</span>, <span class="code-number">0.6</span>),</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;..<span class="code-function">default</span>()</div>
+                            <div class="code-line">}),</div>
+                        </div>
+                        <div class="tip-box">
+                            <p>This code snippet contains <strong>both</strong> <span class="highlight">:</span> and <span class="highlight2">::</span> syntax. Let's break it down!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 2 -->
+            <div class="slide-container" id="slide-2" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">The Single Colon `:` (Field Assignment)</div>
+                    <div class="slide-number">2</div>
+                </div>
+                <div class="slide-content">
+                    <div class="explanation-column">
+                        <div class="section-title">
+                            <div class="icon colon-icon">:</div>
+                            <div class="section-name">What `:` Means</div>
+                        </div>
+                        <div class="content-text">
+                            <p>In Rust, inside a <strong>struct literal</strong>, the single colon <span class="highlight">:</span> means:</p>
+                            
+                            <div class="note-box">
+                                <h4>"Assign this value to this field"</h4>
+                            </div>
+                            
+                            <p>It's the syntax for field assignment when creating a struct instance.</p>
+                            
+                            <h3>Where we see it:</h3>
+                            <ul>
+                                <li><code>material: materials.add(...)</code></li>
+                                <li><code>base_color: Color::srgb(...)</code></li>
+                            </ul>
+                            
+                            <div class="tip-box">
+                                <p>Think of <span class="highlight">:</span> as <strong>"gets"</strong> or <strong>"is assigned to"</strong> when reading code.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="code-column">
+                        <div class="section-title">
+                            <div class="icon double-colon-icon"><i class="fas fa-code"></i></div>
+                            <div class="section-name">Code Structure</div>
+                        </div>
+                        <div class="code-block colon-example">
+                            <div class="code-line"><span class="code-comment">// Struct definition (simplified)</span></div>
+                            <div class="code-line"><span class="code-keyword">struct</span> <span class="code-type">StandardMaterial</span> {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">base_color</span>: <span class="code-type">Color</span>,</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">metallic</span>: <span class="code-type">f32</span>,</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">roughness</span>: <span class="code-type">f32</span>,</div>
+                            <div class="code-line">}</div>
+                            <div class="code-line"></div>
+                            <div class="code-line"><span class="code-comment">// Creating an instance with `:`</span></div>
+                            <div class="code-line"><span class="code-keyword">let</span> material = <span class="code-type">StandardMaterial</span> {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">base_color</span>: <span class="code-type">Color</span>::<span class="code-function">srgb</span>(<span class="code-number">0.8</span>, <span class="code-number">0.7</span>, <span class="code-number">0.6</span>),</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">metallic</span>: <span class="code-number">0.0</span>,</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">roughness</span>: <span class="code-number">0.5</span>,</div>
+                            <div class="code-line">};</div>
+                        </div>
+                        <p>Each <span class="highlight">:</span> assigns a value to a specific field of the struct.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 3 -->
+            <div class="slide-container" id="slide-3" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Example 1: `material: ...`</div>
+                    <div class="slide-number">3</div>
+                </div>
+                <div class="slide-content">
+                    <div class="explanation-column">
+                        <div class="section-title">
+                            <div class="icon colon-icon"><i class="fas fa-cube"></i></div>
+                            <div class="section-name">Understanding `material`</div>
+                        </div>
+                        <div class="content-text">
+                            <h3>Code:</h3>
+                            <p><code>material: materials.add(...)</code></p>
+                            
+                            <h3>How to read it:</h3>
+                            <div class="note-box">
+                                <p>"The <strong>material field</strong> gets the value returned by <code>materials.add(...)</code>"</p>
+                            </div>
+                            
+                            <h3>What is `material`?</h3>
+                            <ul>
+                                <li><code>material</code> is a <strong>field name</strong></li>
+                                <li>It belongs to <code>PbrBundle</code></li>
+                            </ul>
+                            
+                            <p>Internally, <code>PbrBundle</code> has a structure like:</p>
+                        </div>
+                    </div>
+                    <div class="code-column">
+                        <div class="section-title">
+                            <div class="icon double-colon-icon"><i class="fas fa-project-diagram"></i></div>
+                            <div class="section-name">PbrBundle Structure</div>
+                        </div>
+                        <div class="code-block colon-example">
+                            <div class="code-line"><span class="code-comment">// Simplified PbrBundle definition</span></div>
+                            <div class="code-line"><span class="code-keyword">struct</span> <span class="code-type">PbrBundle</span> {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">mesh</span>: <span class="code-type">Handle</span>&lt;<span class="code-type">Mesh</span>&gt;,</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">material</span>: <span class="code-type">Handle</span>&lt;<span class="code-type">StandardMaterial</span>&gt;,</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">transform</span>: <span class="code-type">Transform</span>,</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment">// ... other fields</span></div>
+                            <div class="code-line">}</div>
+                            <div class="code-line"></div>
+                            <div class="code-line"><span class="code-comment">// Creating a PbrBundle instance</span></div>
+                            <div class="code-line"><span class="code-keyword">let</span> bundle = <span class="code-type">PbrBundle</span> {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">mesh</span>: mesh_handle,</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">material</span>: material_handle, <span class="code-comment">// ← This is where `:` is used</span></div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">transform</span>: <span class="code-type">Transform</span>::<span class="code-function">default</span>(),</div>
+                            <div class="code-line">};</div>
+                        </div>
+                        <p>So <code>material: something</code> means: "Put <code>something</code> into the <code>material</code> field."</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 4 -->
+            <div class="slide-container" id="slide-4" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Example 2: `base_color: ...`</div>
+                    <div class="slide-number">4</div>
+                </div>
+                <div class="slide-content">
+                    <div class="explanation-column">
+                        <div class="section-title">
+                            <div class="icon colon-icon"><i class="fas fa-palette"></i></div>
+                            <div class="section-name">Understanding `base_color`</div>
+                        </div>
+                        <div class="content-text">
+                            <h3>Code:</h3>
+                            <p><code>base_color: Color::srgb(0.8, 0.7, 0.6)</code></p>
+                            
+                            <h3>How to read it:</h3>
+                            <div class="note-box">
+                                <p>"The <strong>base_color field</strong> gets this color value"</p>
+                            </div>
+                            
+                            <h3>What is `base_color`?</h3>
+                            <ul>
+                                <li><code>base_color</code> is a <strong>field name</strong></li>
+                                <li>It belongs to <code>StandardMaterial</code></li>
+                            </ul>
+                            
+                            <p><code>StandardMaterial</code> has a structure like:</p>
+                        </div>
+                    </div>
+                    <div class="code-column">
+                        <div class="section-title">
+                            <div class="icon double-colon-icon"><i class="fas fa-layer-group"></i></div>
+                            <div class="section-name">StandardMaterial Structure</div>
+                        </div>
+                        <div class="code-block colon-example">
+                            <div class="code-line"><span class="code-comment">// StandardMaterial definition (simplified)</span></div>
+                            <div class="code-line"><span class="code-keyword">struct</span> <span class="code-type">StandardMaterial</span> {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">base_color</span>: <span class="code-type">Color</span>,</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">metallic</span>: <span class="code-type">f32</span>,</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">roughness</span>: <span class="code-type">f32</span>,</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment">// ... other fields</span></div>
+                            <div class="code-line">}</div>
+                            <div class="code-line"></div>
+                            <div class="code-line"><span class="code-comment">// Creating a StandardMaterial instance</span></div>
+                            <div class="code-line"><span class="code-keyword">let</span> material = <span class="code-type">StandardMaterial</span> {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">base_color</span>: <span class="code-type">Color</span>::<span class="code-function">srgb</span>(<span class="code-number">0.8</span>, <span class="code-number">0.7</span>, <span class="code-number">0.6</span>),</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">metallic</span>: <span class="code-number">0.0</span>,</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">roughness</span>: <span class="code-number">0.5</span>,</div>
+                            <div class="code-line">};</div>
+                        </div>
+                        <p>Again: Left of <span class="highlight">:</span> → <strong>field name</strong>, Right of <span class="highlight">:</span> → <strong>value</strong></p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 5 -->
+            <div class="slide-container" id="slide-5" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Rule for `:`</div>
+                    <div class="slide-number">5</div>
+                </div>
+                <div class="slide-content">
+                    <div class="explanation-column">
+                        <div class="section-title">
+                            <div class="icon colon-icon"><i class="fas fa-rules"></i></div>
+                            <div class="section-name">When to Use `:`</div>
+                        </div>
+                        <div class="content-text">
+                            <p>The single colon <span class="highlight">:</span> has different meanings in different contexts:</p>
+                            
+                            <h3>1. Struct Literals (Most Common in Bevy)</h3>
+                            <p>Assign value to a field: <code>field_name: value</code></p>
+                            
+                            <h3>2. Type Annotations</h3>
+                            <p>Specify type of a variable: <code>let x: i32 = 5;</code></p>
+                            
+                            <h3>3. Function Parameters</h3>
+                            <p>Define parameter types: <code>fn add(x: i32, y: i32) -> i32</code></p>
+                            
+                            <h3>4. Pattern Matching</h3>
+                            <p>In match statements: <code>Some(x) => println!("{}", x)</code></p>
+                            
+                            <div class="tip-box">
+                                <p>In <strong>your Bevy code</strong>, when you see <code>field_name: value</code> inside curly braces <code>{ }</code>, it's <strong>field assignment</strong> in a struct literal.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="code-column">
+                        <div class="section-title">
+                            <div class="icon double-colon-icon"><i class="fas fa-table"></i></div>
+                            <div class="section-name">Summary Table</div>
+                        </div>
+                        <table class="comparison-table">
+                            <thead>
+                                <tr>
+                                    <th>Context</th>
+                                    <th>Example</th>
+                                    <th>Meaning</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="colon-row">
+                                    <td><strong>Struct literal</strong></td>
+                                    <td><code>material: value</code></td>
+                                    <td>Assign value to field</td>
+                                </tr>
+                                <tr>
+                                    <td>Type annotation</td>
+                                    <td><code>x: i32</code></td>
+                                    <td>Variable x has type i32</td>
+                                </tr>
+                                <tr class="colon-row">
+                                    <td>Function parameters</td>
+                                    <td><code>fn foo(x: i32)</code></td>
+                                    <td>Parameter x has type i32</td>
+                                </tr>
+                                <tr>
+                                    <td>Pattern matching</td>
+                                    <td><code>Some(x) => ...</code></td>
+                                    <td>Destructure option</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="warning-box">
+                            <p><strong>In your Bevy code</strong>, it's almost always <strong>field assignment in struct literals</strong>.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 6 -->
+            <div class="slide-container" id="slide-6" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">The Double Colon `::` (Path Separator)</div>
+                    <div class="slide-number">6</div>
+                </div>
+                <div class="slide-content">
+                    <div class="explanation-column">
+                        <div class="section-title">
+                            <div class="icon double-colon-icon">::</div>
+                            <div class="section-name">What `::` Means</div>
+                        </div>
+                        <div class="content-text">
+                            <p>The double colon <span class="highlight2">::</span> is a <strong>path separator</strong> in Rust.</p>
+                            
+                            <div class="note-box">
+                                <h4>"Access something that belongs to a type or module"</h4>
+                            </div>
+                            
+                            <p>Think of it as:</p>
+                            <ul>
+                                <li><strong>C++</strong> → <code>Type::method()</code></li>
+                                <li><strong>Java/C#</strong> → <code>Class.method()</code> (static methods)</li>
+                                <li><strong>Python</strong> → <code>module.function()</code></li>
+                            </ul>
+                            
+                            <h3>Where we see it:</h3>
+                            <ul>
+                                <li><code>Color::srgb(...)</code></li>
+                                <li><code>StandardMaterial { ... }</code> (the type name itself)</li>
+                                <li><code>Transform::from_xyz(...)</code></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="code-column">
+                        <div class="section-title">
+                            <div class="icon colon-icon"><i class="fas fa-sitemap"></i></div>
+                            <div class="section-name">Namespace Access</div>
+                        </div>
+                        <div class="code-block double-colon-example">
+                            <div class="code-line"><span class="code-comment">// Accessing associated functions</span></div>
+                            <div class="code-line"><span class="code-type">Color</span>::<span class="code-function">srgb</span>(<span class="code-number">0.8</span>, <span class="code-number">0.7</span>, <span class="code-number">0.6</span>)</div>
+                            <div class="code-line"><span class="type">Transform</span>::<span class="code-function">from_xyz</span>(<span class="code-number">2.0</span>, <span class="code-number">3.0</span>, <span class="code-number">-4.0</span>)</div>
+                            <div class="code-line"><span class="type">Vec3</span>::<span class="code-field">ZERO</span> <span class="code-comment">// Associated constant</span></div>
+                            <div class="code-line"></div>
+                            <div class="code-line"><span class="code-comment">// Accessing module contents</span></div>
+                            <div class="code-line"><span class="code-keyword">use</span> <span class="code-type">std</span>::<span class="code-type">fs</span>;</div>
+                            <div class="code-line"><span class="code-type">fs</span>::<span class="code-function">read_to_string</span>(<span class="code-string">"file.txt"</span>)</div>
+                            <div class="code-line"></div>
+                            <div class="code-line"><span class="code-comment">// Referring to a type</span></div>
+                            <div class="code-line"><span class="code-keyword">let</span> material: <span class="code-type">StandardMaterial</span> = ...;</div>
+                        </div>
+                        <p><span class="highlight2">::</span> connects a module/type to its contents.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 7 -->
+            <div class="slide-container" id="slide-7" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Example: `Color::srgb`</div>
+                    <div class="slide-number">7</div>
+                </div>
+                <div class="slide-content">
+                    <div class="explanation-column">
+                        <div class="section-title">
+                            <div class="icon double-colon-icon"><i class="fas fa-fill-drip"></i></div>
+                            <div class="section-name">Understanding `Color::srgb`</div>
+                        </div>
+                        <div class="content-text">
+                            <h3>Code:</h3>
+                            <p><code>Color::srgb(0.8, 0.7, 0.6)</code></p>
+                            
+                            <h3>How to read it:</h3>
+                            <div class="note-box">
+                                <p>"Call the function <code>srgb</code> that belongs to the type <code>Color</code>"</p>
+                            </div>
+                            
+                            <h3>Important Detail:</h3>
+                            <ul>
+                                <li><code>srgb</code> is <strong>not</strong> a free function</li>
+                                <li>It's an <strong>associated function</strong> of <code>Color</code></li>
+                                <li>Similar to <strong>static methods</strong> in other languages</li>
+                            </ul>
+                            
+                            <p>The definition looks like:</p>
+                        </div>
+                    </div>
+                    <div class="code-column">
+                        <div class="section-title">
+                            <div class="icon colon-icon"><i class="fas fa-code-branch"></i></div>
+                            <div class="section-name">Associated Function Definition</div>
+                        </div>
+                        <div class="code-block double-colon-example">
+                            <div class="code-line"><span class="code-comment">// Color type definition (simplified)</span></div>
+                            <div class="code-line"><span class="code-keyword">struct</span> <span class="code-type">Color</span> {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;r: <span class="code-type">f32</span>,</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;g: <span class="code-type">f32</span>,</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;b: <span class="code-type">f32</span>,</div>
+                            <div class="code-line">}</div>
+                            <div class="code-line"></div>
+                            <div class="code-line"><span class="code-comment">// Implementation block for Color</span></div>
+                            <div class="code-line"><span class="code-keyword">impl</span> <span class="code-type">Color</span> {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment">// Associated function (like a static method)</span></div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">pub</span> <span class="code-keyword">fn</span> <span class="code-function">srgb</span>(r: <span class="code-type">f32</span>, g: <span class="code-type">f32</span>, b: <span class="code-type">f32</span>) -> <span class="code-type">Color</span> {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-type">Color</span> { r, g, b }</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+                            <div class="code-line">}</div>
+                            <div class="code-line"></div>
+                            <div class="code-line"><span class="code-comment">// Usage:</span></div>
+                            <div class="code-line"><span class="code-keyword">let</span> red = <span class="code-type">Color</span>::<span class="code-function">srgb</span>(<span class="code-number">1.0</span>, <span class="code-number">0.0</span>, <span class="code-number">0.0</span>);</div>
+                        </div>
+                        <p>So: <code>Color</code> → type, <span class="highlight2">::</span><code>srgb</code> → function attached to the type</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 8 -->
+            <div class="slide-container" id="slide-8" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">`:` vs `::` Side-by-Side</div>
+                    <div class="slide-number">8</div>
+                </div>
+                <div class="slide-content">
+                    <div class="explanation-column">
+                        <div class="section-title">
+                            <div class="icon colon-icon">:</div>
+                            <div class="section-name">Comparison</div>
+                        </div>
+                        <div class="content-text">
+                            <p>Let's compare <span class="highlight">:</span> and <span class="highlight2">::</span> directly:</p>
+                            
+                            <h3>Single Colon <span class="highlight">:</span></h3>
+                            <ul>
+                                <li><strong>Purpose:</strong> Assign value to struct field</li>
+                                <li><strong>Context:</strong> Inside struct literals <code>{ }</code></li>
+                                <li><strong>Analogy:</strong> "is assigned to" or "gets"</li>
+                                <li><strong>Example:</strong> <code>base_color: Color::srgb(...)</code></li>
+                            </ul>
+                            
+                            <h3>Double Colon <span class="highlight2">::</span></h3>
+                            <ul>
+                                <li><strong>Purpose:</strong> Access type/module member</li>
+                                <li><strong>Context:</strong> Anywhere you reference a type or module</li>
+                                <li><strong>Analogy:</strong> "belongs to"</li>
+                                <li><strong>Example:</strong> <code>Color::srgb(...)</code></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="code-column">
+                        <div class="section-title">
+                            <div class="icon double-colon-icon">::</div>
+                            <div class="section-name">Quick Reference Table</div>
+                        </div>
+                        <table class="comparison-table">
+                            <thead>
+                                <tr>
+                                    <th class="symbol-cell">Symbol</th>
+                                    <th>Name</th>
+                                    <th>Purpose</th>
+                                    <th>Example</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="colon-row">
+                                    <td class="symbol-cell"><span class="highlight">:</span></td>
+                                    <td><strong>Field separator</strong></td>
+                                    <td>Assign value to struct field</td>
+                                    <td><code>material: value</code></td>
+                                </tr>
+                                <tr class="double-colon-row">
+                                    <td class="symbol-cell"><span class="highlight2">::</span></td>
+                                    <td><strong>Path separator</strong></td>
+                                    <td>Access type/module member</td>
+                                    <td><code>Color::srgb(...)</code></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div class="tip-box">
+                            <h4>Mental Shortcut:</h4>
+                            <p><span class="highlight">Single colon `:`</span> → <strong>"is assigned to"</strong></p>
+                            <p><span class="highlight2">Double colon `::`</span> → <strong>"belongs to"</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 9 -->
+            <div class="slide-container" id="slide-9" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Reading Code Out Loud</div>
+                    <div class="slide-number">9</div>
+                </div>
+                <div class="slide-content">
+                    <div class="explanation-column">
+                        <div class="section-title">
+                            <div class="icon colon-icon"><i class="fas fa-book-reader"></i></div>
+                            <div class="section-name">VERY IMPORTANT</div>
+                        </div>
+                        <div class="content-text">
+                            <p>Let's read the original code <strong>like a sentence</strong>:</p>
+                            
+                            <div class="note-box" style="font-size: 1.1rem; line-height: 1.6;">
+                                <p><code>material:</code><br>
+                                <em>"For the <strong>material</strong> field..."</em></p>
+                                
+                                <p><code>materials.add(</code><br>
+                                <em>"...add a new material to the material assets..."</em></p>
+                                
+                                <p><code>StandardMaterial {</code><br>
+                                <em>"...which is a StandardMaterial struct..."</em></p>
+                                
+                                <p><code>base_color:</code><br>
+                                <em>"...whose base_color is..."</em></p>
+                                
+                                <p><code>Color::srgb(0.8, 0.7, 0.6)</code><br>
+                                <em>"...a color created by Color's <strong>srgb</strong> function..."</em></p>
+                                
+                                <p><code>..default()</code><br>
+                                <em>"...and everything else uses default values."</em></p>
+                            </div>
+                            
+                            <p>This "reading out loud" technique helps understand the structure of Rust code.</p>
+                        </div>
+                    </div>
+                    <div class="code-column">
+                        <div class="section-title">
+                            <div class="icon double-colon-icon"><i class="fas fa-comment-dots"></i></div>
+                            <div class="section-name">Full Translation</div>
+                        </div>
+                        <div class="code-block">
+                            <div class="code-line"><span class="code-comment">// The original code:</span></div>
+                            <div class="code-line"><span class="code-field">material</span>: <span class="code-function">materials.add</span>(<span class="code-type">StandardMaterial</span> {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">base_color</span>: <span class="code-type">Color</span>::<span class="code-function">srgb</span>(<span class="code-number">0.8</span>, <span class="code-number">0.7</span>, <span class="code-number">0.6</span>),</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;..<span class="code-function">default</span>()</div>
+                            <div class="code-line">}),</div>
+                        </div>
+                        
+                        <div class="tip-box">
+                            <h4>Complete English Translation:</h4>
+                            <p>"Create a PBR bundle where the material field gets a new StandardMaterial added to the materials asset collection. This StandardMaterial has a base_color field set to an sRGB color with values (0.8, 0.7, 0.6), and all other fields use their default values."</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 10 -->
+            <div class="slide-container" id="slide-10" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Common Beginner Mistakes</div>
+                    <div class="slide-number">10</div>
+                </div>
+                <div class="slide-content">
+                    <div class="explanation-column">
+                        <div class="section-title">
+                            <div class="icon colon-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                            <div class="section-name">Important to Avoid</div>
+                        </div>
+                        <div class="content-text">
+                            <p>Here are common mistakes beginners make with <span class="highlight">:</span> and <span class="highlight2">::</span>:</p>
+                            
+                            <h3>❌ Wrong Examples:</h3>
+                            
+                            <div class="warning-box">
+                                <p><code>Color:sRGB(0.8, 0.7, 0.6)</code></p>
+                                <p><strong>Problem:</strong> Using <span class="highlight">:</span> instead of <span class="highlight2">::</span></p>
+                            </div>
+                            
+                            <div class="warning-box">
+                                <p><code>base_color = Color::srgb(...)</code></p>
+                                <p><strong>Problem:</strong> Using <code>=</code> instead of <span class="highlight">:</span> in struct literals</p>
+                            </div>
+                            
+                            <div class="warning-box">
+                                <p><code>material:: materials.add(...)</code></p>
+                                <p><strong>Problem:</strong> Using <span class="highlight2">::</span> instead of <span class="highlight">:</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="code-column">
+                        <div class="section-title">
+                            <div class="icon double-colon-icon"><i class="fas fa-check-circle"></i></div>
+                            <div class="section-name">✅ Correct Examples</div>
+                        </div>
+                        <div class="code-block colon-example">
+                            <div class="code-line"><span class="code-comment">// ✅ CORRECT: `:` for field assignment</span></div>
+                            <div class="code-line"><span class="code-field">base_color</span>: <span class="code-type">Color</span>::<span class="code-function">srgb</span>(...)</div>
+                        </div>
+                        
+                        <div class="code-block double-colon-example">
+                            <div class="code-line"><span class="code-comment">// ✅ CORRECT: `::` for type member access</span></div>
+                            <div class="code-line"><span class="code-type">Color</span>::<span class="code-function">srgb</span>(...)</div>
+                        </div>
+                        
+                        <div class="tip-box">
+                            <h4>Why these rules?</h4>
+                            <ul>
+                                <li><span class="highlight">:</span> assigns fields in structs (not <code>=</code>)</li>
+                                <li><span class="highlight2">::</span> accesses type members (not <span class="highlight">:</span>)</li>
+                                <li><code>=</code> is <strong>not used</strong> in struct literals in Rust</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 11 -->
+            <div class="slide-container" id="slide-11" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Field vs Type: What's the Difference?</div>
+                    <div class="slide-number">11</div>
+                </div>
+                <div class="slide-content">
+                    <div class="explanation-column">
+                        <div class="section-title">
+                            <div class="icon colon-icon"><i class="fas fa-question-circle"></i></div>
+                            <div class="section-name">Field vs Type</div>
+                        </div>
+                        <div class="content-text">
+                            <h3>The Core Difference:</h3>
+                            
+                            <div class="note-box">
+                                <p><strong>Fields</strong> are <em>properties</em> of a struct instance.</p>
+                                <p><strong>Types</strong> are <em>categories</em> or <em>blueprints</em> for creating instances.</p>
+                            </div>
+                            
+                            <h3>Analogy:</h3>
+                            <ul>
+                                <li><strong>Type</strong> = Blueprint for a house</li>
+                                <li><strong>Field</strong> = A specific room in a house</li>
+                                <li><strong>Value</strong> = What's in that room</li>
+                            </ul>
+                            
+                            <h3>In Rust Code:</h3>
+                            <ul>
+                                <li><code>StandardMaterial</code> → A <strong>type</strong> (blueprint)</li>
+                                <li><code>base_color</code> → A <strong>field</strong> (property)</li>
+                                <li><code>Color::srgb(0.8, 0.7, 0.6)</code> → A <strong>value</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="code-column">
+                        <div class="section-title">
+                            <div class="icon double-colon-icon"><i class="fas fa-object-group"></i></div>
+                            <div class="section-name">Visual Representation</div>
+                        </div>
+                        <div class="code-block">
+                            <div class="code-line"><span class="code-comment">// TYPE: Blueprint for creating materials</span></div>
+                            <div class="code-line"><span class="code-keyword">struct</span> <span class="code-type">StandardMaterial</span> {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment">// FIELDS: Properties each material has</span></div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">base_color</span>: <span class="code-type">Color</span>,    <span class="code-comment">// ← FIELD with TYPE Color</span></div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">metallic</span>: <span class="code-type">f32</span>,        <span class="code-comment">// ← FIELD with TYPE f32</span></div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">roughness</span>: <span class="code-type">f32</span>,       <span class="code-comment">// ← FIELD with TYPE f32</span></div>
+                            <div class="code-line">}</div>
+                            <div class="code-line"></div>
+                            <div class="code-line"><span class="code-comment">// Creating an INSTANCE of the type:</span></div>
+                            <div class="code-line"><span class="code-keyword">let</span> material = <span class="code-type">StandardMaterial</span> {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment">// Assigning VALUES to FIELDS:</span></div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">base_color</span>: <span class="code-type">Color</span>::<span class="code-function">srgb</span>(<span class="code-number">0.8</span>, <span class="code-number">0.7</span>, <span class="code-number">0.6</span>), <span class="code-comment">// ← VALUE</span></div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">metallic</span>: <span class="code-number">0.0</span>,                    <span class="code-comment">// ← VALUE</span></div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-field">roughness</span>: <span class="code-number">0.5</span>,                   <span class="code-comment">// ← VALUE</span></div>
+                            <div class="code-line">};</div>
+                        </div>
+                        <div class="tip-box">
+                            <p><strong>Key Relationship:</strong> Types define what fields exist. Fields store values. The <span class="highlight">:</span> syntax connects fields to their values when creating instances.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 12 -->
+            <div class="slide-container" id="slide-12" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">What's Next?</div>
+                    <div class="slide-number">12</div>
+                </div>
+                <div class="slide-content">
+                    <div class="explanation-column">
+                        <div class="section-title">
+                            <div class="icon colon-icon"><i class="fas fa-arrow-right"></i></div>
+                            <div class="section-name">Continue Learning</div>
+                        </div>
+                        <div class="content-text">
+                            <p>Now that you understand <span class="highlight">:</span> vs <span class="highlight2">::</span>, here's what to learn next:</p>
+                            
+                            <div class="note-box">
+                                <h4><i class="fas fa-ellipsis-h"></i> Explain `..default()` deeply</h4>
+                                <p>The struct update syntax in Rust</p>
+                            </div>
+                            
+                            <div class="note-box">
+                                <h4><i class="fas fa-plus-circle"></i> Explain `materials.add(...)`</h4>
+                                <p>How Bevy's asset system works</p>
+                            </div>
+                            
+                            <div class="note-box">
+                                <h4><i class="fas fa-hand-pointer"></i> Explain `Handle<T>`</h4>
+                                <p>Bevy's handle system for asset management</p>
+                            </div>
+                            
+                            <div class="note-box">
+                                <h4><i class="fas fa-code-compare"></i> Compare Rust struct syntax</h4>
+                                <p>How Rust differs from C, Python, Java, etc.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="code-column">
+                        <div class="section-title">
+                            <div class="icon double-colon-icon"><i class="fas fa-graduation-cap"></i></div>
+                            <div class="section-name">Practice Exercise</div>
+                        </div>
+                        <div class="code-block">
+                            <div class="code-line"><span class="code-comment">// Identify all uses of `:` and `::` in this code:</span></div>
+                            <div class="code-line"><span class="code-function">commands.spawn</span>(<span class="code-type">PointLightBundle</span> {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;point_light: <span class="code-type">PointLight</span> {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;intensity: <span class="code-number">1500.0</span>,</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;shadows_enabled: <span class="code-keyword">true</span>,</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;..<span class="code-function">default</span>()</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;},</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;transform: <span class="code-type">Transform</span>::<span class="code-function">from_xyz</span>(<span class="code-number">4.0</span>, <span class="code-number">8.0</span>, <span class="code-number">4.0</span>),</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;..<span class="code-function">default</span>()</div>
+                            <div class="code-line">});</div>
+                        </div>
+                        
+                        <div class="tip-box">
+                            <h4>Check Your Understanding:</h4>
+                            <ol>
+                                <li>How many <span class="highlight">:</span> symbols are used for field assignment?</li>
+                                <li>How many <span class="highlight2">::</span> symbols are used for type member access?</li>
+                                <li>What does each <span class="highlight">:</span> connect (field → value)?</li>
+                                <li>What does each <span class="highlight2">::</span> connect (type → member)?</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation Controls -->
+            <div class="nav-controls">
+                <button class="nav-button" id="prev-btn" disabled>
+                    <i class="fas fa-chevron-left"></i> Previous Slide
+                </button>
+                
+                <div class="slide-indicator">
+                    Slide <span id="current-slide">1</span> of <span id="total-slides">12</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                </div>
+                
+                <button class="nav-button" id="next-btn">
+                    Next Slide <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            
+            <!-- Slide Thumbnails -->
+            <div class="slide-list" id="slide-list">
+                <!-- Slide thumbnails will be generated by JavaScript -->
+            </div>
+        </main>
+        
+        <footer class="footer">
+            <p>Rust Syntax: `:` vs `::` Explained | Created for Bevy learners</p>
+            <p style="margin-top: 10px;">Use navigation buttons, arrow keys, or click slide numbers to navigate</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelectorAll('.slide-container');
+            const totalSlides = slides.length;
+            let currentSlide = 0;
+            
+            // Update slide indicators
+            const currentSlideEl = document.getElementById('current-slide');
+            const totalSlidesEl = document.getElementById('total-slides');
+            const progressFill = document.getElementById('progress-fill');
+            
+            totalSlidesEl.textContent = totalSlides;
+            
+            // Navigation buttons
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            
+            // Generate slide thumbnails
+            const slideList = document.getElementById('slide-list');
+            
+            for (let i = 0; i < totalSlides; i++) {
+                const slideThumb = document.createElement('div');
+                slideThumb.className = 'slide-thumbnail';
+                slideThumb.textContent = i + 1;
+                slideThumb.dataset.slideIndex = i;
+                
+                if (i === 0) {
+                    slideThumb.classList.add('active');
+                }
+                
+                slideThumb.addEventListener('click', function() {
+                    goToSlide(parseInt(this.dataset.slideIndex));
+                });
+                
+                slideList.appendChild(slideThumb);
+            }
+            
+            // Function to update slide display
+            function updateSlideDisplay() {
+                // Hide all slides
+                slides.forEach(slide => {
+                    slide.style.display = 'none';
+                });
+                
+                // Show current slide
+                slides[currentSlide].style.display = 'flex';
+                
+                // Update indicators
+                currentSlideEl.textContent = currentSlide + 1;
+                const progress = ((currentSlide + 1) / totalSlides) * 100;
+                progressFill.style.width = `${progress}%`;
+                
+                // Update button states
+                prevBtn.disabled = currentSlide === 0;
+                nextBtn.disabled = currentSlide === totalSlides - 1;
+                
+                // Update active thumbnail
+                document.querySelectorAll('.slide-thumbnail').forEach((thumb, index) => {
+                    if (index === currentSlide) {
+                        thumb.classList.add('active');
+                    } else {
+                        thumb.classList.remove('active');
+                    }
+                });
+                
+                // Scroll to the current slide
+                slides[currentSlide].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            
+            // Function to go to a specific slide
+            function goToSlide(slideIndex) {
+                if (slideIndex >= 0 && slideIndex < totalSlides) {
+                    currentSlide = slideIndex;
+                    updateSlideDisplay();
+                }
+            }
+            
+            // Previous button event
+            prevBtn.addEventListener('click', function() {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    updateSlideDisplay();
+                }
+            });
+            
+            // Next button event
+            nextBtn.addEventListener('click', function() {
+                if (currentSlide < totalSlides - 1) {
+                    currentSlide++;
+                    updateSlideDisplay();
+                }
+            });
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'ArrowLeft') {
+                    if (currentSlide > 0) {
+                        goToSlide(currentSlide - 1);
+                    }
+                } else if (event.key === 'ArrowRight') {
+                    if (currentSlide < totalSlides - 1) {
+                        goToSlide(currentSlide + 1);
+                    }
+                } else if (event.key >= '1' && event.key <= '9') {
+                    const slideNum = parseInt(event.key) - 1;
+                    if (slideNum < totalSlides) {
+                        goToSlide(slideNum);
+                    }
+                }
+            });
+            
+            // Initialize
+            updateSlideDisplay();
+        });
+    </script>
+</body>
+</html>
