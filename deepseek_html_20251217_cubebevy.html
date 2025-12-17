@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bevy Cube + Light - Code Explanation Slides</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e6e6e6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 25px 0;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            color: #aaa;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+        
+        .slide-container {
+            display: flex;
+            flex-direction: column;
+            background: rgba(25, 25, 35, 0.9);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            margin-bottom: 30px;
+            border: 1px solid #2c3e50;
+        }
+        
+        .slide-header {
+            background: linear-gradient(90deg, #2c3e50, #34495e);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .slide-title {
+            font-size: 1.6rem;
+            font-weight: 600;
+        }
+        
+        .slide-number {
+            background: #3498db;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .slide-content {
+            display: flex;
+            min-height: 350px;
+        }
+        
+        .language-column {
+            flex: 1;
+            padding: 30px;
+            border-right: 1px solid #34495e;
+        }
+        
+        .language-column:last-child {
+            border-right: none;
+        }
+        
+        .language-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #3498db;
+        }
+        
+        .flag-icon {
+            width: 30px;
+            height: 20px;
+            margin-right: 10px;
+            border-radius: 3px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .en-flag {
+            background: linear-gradient(90deg, #012169 0%, #012169 33%, #c8102e 33%, #c8102e 66%, #ffffff 66%);
+        }
+        
+        .th-flag {
+            background: linear-gradient(180deg, #ed1c24 0%, #ed1c24 33%, #ffffff 33%, #ffffff 66%, #241d4f 66%);
+        }
+        
+        .lang-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .content-text {
+            line-height: 1.7;
+            font-size: 1.1rem;
+        }
+        
+        .content-text p {
+            margin-bottom: 15px;
+        }
+        
+        .code-block {
+            background: #1e1e2e;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            overflow-x: auto;
+            border-left: 4px solid #3498db;
+        }
+        
+        .code-line {
+            margin-bottom: 5px;
+        }
+        
+        .highlight {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+        
+        .nav-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #34495e;
+        }
+        
+        .nav-button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-button:hover {
+            background: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .nav-button:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .nav-button i {
+            margin: 0 8px;
+        }
+        
+        .slide-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.1rem;
+        }
+        
+        .progress-bar {
+            width: 200px;
+            height: 8px;
+            background: #34495e;
+            border-radius: 4px;
+            margin: 0 15px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            width: 5%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .slide-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(25, 25, 35, 0.7);
+            border-radius: 10px;
+        }
+        
+        .slide-thumbnail {
+            background: #2c3e50;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            text-align: center;
+            min-width: 60px;
+        }
+        
+        .slide-thumbnail:hover {
+            background: #3498db;
+            transform: translateY(-5px);
+        }
+        
+        .slide-thumbnail.active {
+            background: #2ecc71;
+            border-color: #27ae60;
+            font-weight: bold;
+        }
+        
+        .page-break {
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+            color: #7f8c8d;
+            font-style: italic;
+            border-top: 1px dashed #34495e;
+            margin-top: 20px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 40px;
+            color: #aaa;
+            font-size: 0.9rem;
+            border-top: 1px solid #34495e;
+        }
+        
+        .footer i {
+            color: #e74c3c;
+        }
+        
+        @media (max-width: 992px) {
+            .slide-content {
+                flex-direction: column;
+            }
+            
+            .language-column {
+                border-right: none;
+                border-bottom: 1px solid #34495e;
+            }
+            
+            .language-column:last-child {
+                border-bottom: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .slide-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .slide-number {
+                margin-top: 10px;
+            }
+            
+            .nav-controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .progress-bar {
+                width: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Creating a Cube in Bevy (with Lighting)</h1>
+            <p class="subtitle">Line-by-line explanation of spawning a cube, adding materials, lights, and a camera in Bevy (ECS-based game engine)</p>
+        </header>
+        
+        <main>
+            <!-- Slide 1 -->
+            <div class="slide-container" id="slide-1">
+                <div class="slide-header">
+                    <div class="slide-title">Slide 1 — Title</div>
+                    <div class="slide-number">1</div>
+                </div>
+                <div class="slide-content">
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon en-flag"></div>
+                            <div class="lang-name">English</div>
+                        </div>
+                        <div class="content-text">
+                            <h3>Creating a Cube in Bevy (with Lighting)</h3>
+                            <p>Line-by-line explanation of spawning a cube, adding materials, lights, and a camera in Bevy (ECS-based game engine).</p>
+                        </div>
+                    </div>
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon th-flag"></div>
+                            <div class="lang-name">Thai</div>
+                        </div>
+                        <div class="content-text">
+                            <h3>Creating a Cube in Bevy (with Lighting)</h3>
+                            <p>ošun@făuuuufa:ussrîn ărıkşumsašvagnurnfı uap uamâpolu Bevy</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 2 -->
+            <div class="slide-container" id="slide-2" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Slide 2 — What is Bevy?</div>
+                    <div class="slide-number">2</div>
+                </div>
+                <div class="slide-content">
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon en-flag"></div>
+                            <div class="lang-name">English</div>
+                        </div>
+                        <div class="content-text">
+                            <ul>
+                                <li>Bevy is a modern 3D game engine written in Rust</li>
+                                <li>Uses <span class="highlight">ECS (Entity Component System)</span> instead of scene graphs</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon th-flag"></div>
+                            <div class="lang-name">Thai</div>
+                        </div>
+                        <div class="content-text">
+                            <ul>
+                                <li>Bevy คือเครื่องมือสร้างเกม 3D สมัยใหม่เขียนด้วยภาษา Rust</li>
+                                <li>ใช้ <span class="highlight">ECS (Entity Component System)</span> แทน scene graph</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 3 -->
+            <div class="slide-container" id="slide-3" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Slide 3 — Importing Bevy</div>
+                    <div class="slide-number">3</div>
+                </div>
+                <div class="slide-content">
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon en-flag"></div>
+                            <div class="lang-name">English</div>
+                        </div>
+                        <div class="content-text">
+                            <div class="code-block">
+                                <div class="code-line">use bevy::prelude::*;</div>
+                            </div>
+                            <ul>
+                                <li>Imports commonly used Bevy types</li>
+                                <li>Reduces boilerplate code</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon th-flag"></div>
+                            <div class="lang-name">Thai</div>
+                        </div>
+                        <div class="content-text">
+                            <div class="code-block">
+                                <div class="code-line">use bevy::prelude::*;</div>
+                            </div>
+                            <ul>
+                                <li>นำเข้า type ที่ใช้บ่อยใน Bevy</li>
+                                <li>ลดโค้ดซ้ำซ้อน (boilerplate)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 4 -->
+            <div class="slide-container" id="slide-4" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Slide 4 — The Setup System</div>
+                    <div class="slide-number">4</div>
+                </div>
+                <div class="slide-content">
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon en-flag"></div>
+                            <div class="lang-name">English</div>
+                        </div>
+                        <div class="content-text">
+                            <div class="code-block">
+                                <div class="code-line">fn setup(</div>
+                                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;mut commands: Commands,</div>
+                                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;mut meshes: ResMut&lt;Assets&lt;Mesh&gt;&gt;,</div>
+                                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;mut materials: ResMut&lt;Assets&lt;StandardMaterial&gt;&gt;,</div>
+                                <div class="code-line">) {</div>
+                            </div>
+                            <p><span class="highlight">setup</span> is a system:</p>
+                            <ul>
+                                <li>Runs once at startup</li>
+                                <li>Responsible for creating the scene</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon th-flag"></div>
+                            <div class="lang-name">Thai</div>
+                        </div>
+                        <div class="content-text">
+                            <p><span class="highlight">setup</span> คือ system:</p>
+                            <ul>
+                                <li>ทำงานครั้งเดียวตอนเริ่มโปรแกรม</li>
+                                <li>มีหน้าที่สร้าง scene</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 5 -->
+            <div class="slide-container" id="slide-5" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Slide 5 — ECS Parameters Explained</div>
+                    <div class="slide-number">5</div>
+                </div>
+                <div class="slide-content">
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon en-flag"></div>
+                            <div class="lang-name">English</div>
+                        </div>
+                        <div class="content-text">
+                            <h4>Commands</h4>
+                            <ul>
+                                <li>Used to spawn entities</li>
+                                <li>Acts like a command buffer</li>
+                            </ul>
+                            
+                            <h4>Assets&lt;Mesh&gt;</h4>
+                            <ul>
+                                <li>Stores all mesh data globally</li>
+                                <li>Mesh = geometry</li>
+                            </ul>
+                            
+                            <h4>Assets&lt;StandardMaterial&gt;</h4>
+                            <ul>
+                                <li>Stores surface appearance</li>
+                                <li>Material = color + lighting response</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon th-flag"></div>
+                            <div class="lang-name">Thai</div>
+                        </div>
+                        <div class="content-text">
+                            <h4>Commands</h4>
+                            <ul>
+                                <li>ใช้สำหรับสร้าง entities</li>
+                                <li>ทำงานเหมือน command buffer</li>
+                            </ul>
+                            
+                            <h4>Assets&lt;Mesh&gt;</h4>
+                            <ul>
+                                <li>เก็บข้อมูล mesh ทั้งหมดแบบ global</li>
+                                <li>Mesh = รูปทรงเรขาคณิต</li>
+                            </ul>
+                            
+                            <h4>Assets&lt;StandardMaterial&gt;</h4>
+                            <ul>
+                                <li>เก็บลักษณะพื้นผิว</li>
+                                <li>Material = สี + การตอบสนองต่อแสง</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="page-break">Page 2</div>
+            </div>
+            
+            <!-- Slide 6 -->
+            <div class="slide-container" id="slide-6" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Slide 6 — Spawning the Cube Entity</div>
+                    <div class="slide-number">6</div>
+                </div>
+                <div class="slide-content">
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon en-flag"></div>
+                            <div class="lang-name">English</div>
+                        </div>
+                        <div class="content-text">
+                            <div class="code-block">
+                                <div class="code-line">commands.spawn(PbrBundle {</div>
+                            </div>
+                            <ul>
+                                <li>Creates a new entity</li>
+                                <li>Uses PbrBundle (Physically Based Rendering)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon th-flag"></div>
+                            <div class="lang-name">Thai</div>
+                        </div>
+                        <div class="content-text">
+                            <div class="code-block">
+                                <div class="code-line">commands.spawn(PbrBundle {</div>
+                            </div>
+                            <ul>
+                                <li>สร้าง entity ใหม่</li>
+                                <li>ใช้ PBR (Physically Based Rendering) สำหรับการแสดงผลที่สมจริง</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 7 -->
+            <div class="slide-container" id="slide-7" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Slide 7 — Creating the Cube Mesh</div>
+                    <div class="slide-number">7</div>
+                </div>
+                <div class="slide-content">
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon en-flag"></div>
+                            <div class="lang-name">English</div>
+                        </div>
+                        <div class="content-text">
+                            <div class="code-block">
+                                <div class="code-line">mesh: meshes.add(Cuboid::new(1.0, 1.0, 1.0)),</div>
+                            </div>
+                            <ul>
+                                <li>Creates a cube (1×1×1)</li>
+                                <li>Mesh defines shape only</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon th-flag"></div>
+                            <div class="lang-name">Thai</div>
+                        </div>
+                        <div class="content-text">
+                            <div class="code-block">
+                                <div class="code-line">mesh: meshes.add(Cuboid::new(1.0, 1.0, 1.0)),</div>
+                            </div>
+                            <ul>
+                                <li>สร้างลูกบาศก์ขนาด 1×1×1</li>
+                                <li>Mesh กำหนดเฉพาะรูปร่าง</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 8 -->
+            <div class="slide-container" id="slide-8" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Slide 8 — Creating the Material</div>
+                    <div class="slide-number">8</div>
+                </div>
+                <div class="slide-content">
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon en-flag"></div>
+                            <div class="lang-name">English</div>
+                        </div>
+                        <div class="content-text">
+                            <div class="code-block">
+                                <div class="code-line">material: materials.add(StandardMaterial {</div>
+                                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;base_color: Color::srgb(0.8, 0.7, 0.6),</div>
+                                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;..default()</div>
+                                <div class="code-line">}),</div>
+                            </div>
+                            <ul>
+                                <li>Defines surface color</li>
+                                <li>Uses PBR lighting model</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon th-flag"></div>
+                            <div class="lang-name">Thai</div>
+                        </div>
+                        <div class="content-text">
+                            <div class="code-block">
+                                <div class="code-line">material: materials.add(StandardMaterial {</div>
+                                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;base_color: Color::srgb(0.8, 0.7, 0.6),</div>
+                                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;..default()</div>
+                                <div class="code-line">}),</div>
+                            </div>
+                            <ul>
+                                <li>กำหนดสีพื้นผิว</li>
+                                <li>รองรับแสงและเงาแบบ PBR</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="page-break">Page 3</div>
+            </div>
+            
+            <!-- Slide 9 -->
+            <div class="slide-container" id="slide-9" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Slide 9 — Why .default()?</div>
+                    <div class="slide-number">9</div>
+                </div>
+                <div class="slide-content">
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon en-flag"></div>
+                            <div class="lang-name">English</div>
+                        </div>
+                        <div class="content-text">
+                            <div class="code-block">
+                                <div class="code-line">..default()</div>
+                            </div>
+                            <ul>
+                                <li>Automatically fills missing fields</li>
+                                <li>Cleaner and safer code</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon th-flag"></div>
+                            <div class="lang-name">Thai</div>
+                        </div>
+                        <div class="content-text">
+                            <div class="code-block">
+                                <div class="code-line">..default()</div>
+                            </div>
+                            <ul>
+                                <li>เติมค่าที่ไม่ได้กำหนดโดยอัตโนมัติ</li>
+                                <li>ทำให้โค้ดสะอาดและปลอดภัยยิ่งขึ้น</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 10 -->
+            <div class="slide-container" id="slide-10" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Slide 10 — Positioning the Cube</div>
+                    <div class="slide-number">10</div>
+                </div>
+                <div class="slide-content">
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon en-flag"></div>
+                            <div class="lang-name">English</div>
+                        </div>
+                        <div class="content-text">
+                            <div class="code-block">
+                                <div class="code-line">transform: Transform::from_xyz(2.0, 3.0, -4.0),</div>
+                            </div>
+                            <ul>
+                                <li>Places cube in 3D space</li>
+                                <li>Bevy uses right-handed coordinates</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon th-flag"></div>
+                            <div class="lang-name">Thai</div>
+                        </div>
+                        <div class="content-text">
+                            <div class="code-block">
+                                <div class="code-line">transform: Transform::from_xyz(2.0, 3.0, -4.0),</div>
+                            </div>
+                            <ul>
+                                <li>กำหนดตำแหน่งของลูกบาศก์ในโลก 3 มิติ</li>
+                                <li>ใช้ระบบพิกัดมือขวา</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 11 -->
+            <div class="slide-container" id="slide-11" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Slide 11 — Coordinate System</div>
+                    <div class="slide-number">11</div>
+                </div>
+                <div class="slide-content">
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon en-flag"></div>
+                            <div class="lang-name">English</div>
+                        </div>
+                        <div class="content-text">
+                            <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                                <tr style="background-color: #2c3e50;">
+                                    <th style="padding: 12px; text-align: left;">Axis</th>
+                                    <th style="padding: 12px; text-align: left;">Meaning</th>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #34495e;">+X</td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #34495e;">Right</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #34495e;">+Y</td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #34495e;">Up</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px;">-Z</td>
+                                    <td style="padding: 10px;">Into the screen</td>
+                                </tr>
+                            </table>
+                            <p style="margin-top: 15px;">Camera looks toward negative Z</p>
+                        </div>
+                    </div>
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon th-flag"></div>
+                            <div class="lang-name">Thai</div>
+                        </div>
+                        <div class="content-text">
+                            <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                                <tr style="background-color: #2c3e50;">
+                                    <th style="padding: 12px; text-align: left;">แกน</th>
+                                    <th style="padding: 12px; text-align: left;">ความหมาย</th>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #34495e;">+X</td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #34495e;">ขวา</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #34495e;">+Y</td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #34495e;">ขึ้น</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px;">-Z</td>
+                                    <td style="padding: 10px;">เข้าไปในหน้าจอ</td>
+                                </tr>
+                            </table>
+                            <p style="margin-top: 15px;">กล้องมองไปทางแกน Z ลบ</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 12 -->
+            <div class="slide-container" id="slide-12" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Slide 12 — Why We Need Light</div>
+                    <div class="slide-number">12</div>
+                </div>
+                <div class="slide-content">
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon en-flag"></div>
+                            <div class="lang-name">English</div>
+                        </div>
+                        <div class="content-text">
+                            <ul>
+                                <li>StandardMaterial requires light</li>
+                                <li>Without light, objects appear black</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon th-flag"></div>
+                            <div class="lang-name">Thai</div>
+                        </div>
+                        <div class="content-text">
+                            <ul>
+                                <li>วัสดุแบบ PBR ต้องใช้แสง</li>
+                                <li>ไม่มีแสง → มองไม่เห็นวัตถุ</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="page-break">Page 4</div>
+            </div>
+            
+            <!-- Slide 13 -->
+            <div class="slide-container" id="slide-13" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Slide 13 — Adding a Point Light</div>
+                    <div class="slide-number">13</div>
+                </div>
+                <div class="slide-content">
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon en-flag"></div>
+                            <div class="lang-name">English</div>
+                        </div>
+                        <div class="content-text">
+                            <div class="code-block">
+                                <div class="code-line">commands.spawn(PointLightBundle {</div>
+                                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;point_light: PointLight {</div>
+                                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;intensity: 1500.0,</div>
+                                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;shadows_enabled: true,</div>
+                                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;..default()</div>
+                                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;},</div>
+                                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;transform: Transform::from_xyz(4.0, 8.0, 4.0),</div>
+                                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;..default()</div>
+                                <div class="code-line">});</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon th-flag"></div>
+                            <div class="lang-name">Thai</div>
+                        </div>
+                        <div class="content-text">
+                            <div class="code-block">
+                                <div class="code-line">commands.spawn(PointLightBundle {</div>
+                                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;point_light: PointLight {</div>
+                                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;intensity: 1500.0,</div>
+                                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;shadows_enabled: true,</div>
+                                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;..default()</div>
+                                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;},</div>
+                                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;transform: Transform::from_xyz(4.0, 8.0, 4.0),</div>
+                                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;..default()</div>
+                                <div class="code-line">});</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 14 -->
+            <div class="slide-container" id="slide-14" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Slide 14 — Point Light Explained</div>
+                    <div class="slide-number">14</div>
+                </div>
+                <div class="slide-content">
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon en-flag"></div>
+                            <div class="lang-name">English</div>
+                        </div>
+                        <div class="content-text">
+                            <ul>
+                                <li>Acts like a light bulb</li>
+                                <li>Emits light in all directions</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon th-flag"></div>
+                            <div class="lang-name">Thai</div>
+                        </div>
+                        <div class="content-text">
+                            <ul>
+                                <li>เหมือนหลอดไฟ</li>
+                                <li>แสงกระจายรอบทิศทาง</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 15 -->
+            <div class="slide-container" id="slide-15" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Slide 15 — Light Intensity</div>
+                    <div class="slide-number">15</div>
+                </div>
+                <div class="slide-content">
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon en-flag"></div>
+                            <div class="lang-name">English</div>
+                        </div>
+                        <div class="content-text">
+                            <div class="code-block">
+                                <div class="code-line">intensity: 1500.0</div>
+                            </div>
+                            <ul>
+                                <li>Controls brightness</li>
+                                <li>Realistic lighting uses large values</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon th-flag"></div>
+                            <div class="lang-name">Thai</div>
+                        </div>
+                        <div class="content-text">
+                            <div class="code-block">
+                                <div class="code-line">intensity: 1500.0</div>
+                            </div>
+                            <ul>
+                                <li>ควบคุมความสว่าง</li>
+                                <li>ใช้ค่าค่อนข้างสูงสำหรับแสงสมจริง</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 16 -->
+            <div class="slide-container" id="slide-16" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Slide 16 — Shadows</div>
+                    <div class="slide-number">16</div>
+                </div>
+                <div class="slide-content">
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon en-flag"></div>
+                            <div class="lang-name">English</div>
+                        </div>
+                        <div class="content-text">
+                            <div class="code-block">
+                                <div class="code-line">shadows_enabled: true</div>
+                            </div>
+                            <ul>
+                                <li>Enables depth perception</li>
+                                <li>Improves realism</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon th-flag"></div>
+                            <div class="lang-name">Thai</div>
+                        </div>
+                        <div class="content-text">
+                            <div class="code-block">
+                                <div class="code-line">shadows_enabled: true</div>
+                            </div>
+                            <ul>
+                                <li>เพิ่มความลึกให้ภาพ</li>
+                                <li>ทำให้ดูสมจริงมากขึ้น</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 17 -->
+            <div class="slide-container" id="slide-17" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Slide 17 — Spawning the Camera</div>
+                    <div class="slide-number">17</div>
+                </div>
+                <div class="slide-content">
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon en-flag"></div>
+                            <div class="lang-name">English</div>
+                        </div>
+                        <div class="content-text">
+                            <div class="code-block">
+                                <div class="code-line">commands.spawn(Camera3dBundle {</div>
+                            </div>
+                            <ul>
+                                <li>Required to render the scene</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon th-flag"></div>
+                            <div class="lang-name">Thai</div>
+                        </div>
+                        <div class="content-text">
+                            <div class="code-block">
+                                <div class="code-line">commands.spawn(Camera3dBundle {</div>
+                            </div>
+                            <ul>
+                                <li>ต้องมีกล้องเพื่อแสดงผล</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="page-break">Page 5</div>
+            </div>
+            
+            <!-- Slide 18 -->
+            <div class="slide-container" id="slide-18" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Slide 18 — Camera Position & Direction</div>
+                    <div class="slide-number">18</div>
+                </div>
+                <div class="slide-content">
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon en-flag"></div>
+                            <div class="lang-name">English</div>
+                        </div>
+                        <div class="content-text">
+                            <div class="code-block">
+                                <div class="code-line">Transform::from_xyz(0.0, 5.0, 15.0)</div>
+                                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;.looking_at(Vec3::ZERO, Vec3::Y)</div>
+                            </div>
+                            <ul>
+                                <li>Positioned above and in front</li>
+                                <li>Looks at the origin</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon th-flag"></div>
+                            <div class="lang-name">Thai</div>
+                        </div>
+                        <div class="content-text">
+                            <div class="code-block">
+                                <div class="code-line">Transform::from_xyz(0.0, 5.0, 15.0)</div>
+                                <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;.looking_at(Vec3::ZERO, Vec3::Y)</div>
+                            </div>
+                            <ul>
+                                <li>อยู่ด้านหน้าและสูงกว่า</li>
+                                <li>มองไปที่จุดกำเนิด (origin)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 19 -->
+            <div class="slide-container" id="slide-19" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Slide 19 — Full Mental Picture</div>
+                    <div class="slide-number">19</div>
+                </div>
+                <div class="slide-content">
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon en-flag"></div>
+                            <div class="lang-name">English</div>
+                        </div>
+                        <div class="content-text">
+                            <ul style="font-size: 1.2rem;">
+                                <li style="margin-bottom: 15px;">Cube at (2, 3, -4)</li>
+                                <li style="margin-bottom: 15px;">Light above the cube</li>
+                                <li>Camera looking toward origin</li>
+                            </ul>
+                            <div style="margin-top: 20px; padding: 15px; background: rgba(52, 152, 219, 0.1); border-radius: 8px; border-left: 4px solid #3498db;">
+                                <p>Visualize the scene: Cube positioned in 3D space with a light source above it, and a camera viewing the scene from a distance.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon th-flag"></div>
+                            <div class="lang-name">Thai</div>
+                        </div>
+                        <div class="content-text">
+                            <ul style="font-size: 1.2rem;">
+                                <li style="margin-bottom: 15px;">ลูกบาศก์อยู่ที่ตำแหน่ง (2, 3, -4)</li>
+                                <li style="margin-bottom: 15px;">แสงอยู่เหนือลูกบาศก์</li>
+                                <li>กล้องมองไปที่จุดกำเนิด</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 20 -->
+            <div class="slide-container" id="slide-20" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Slide 20 — ECS Mapping</div>
+                    <div class="slide-number">20</div>
+                </div>
+                <div class="slide-content">
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon en-flag"></div>
+                            <div class="lang-name">English</div>
+                        </div>
+                        <div class="content-text">
+                            <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                                <tr style="background-color: #2c3e50;">
+                                    <th style="padding: 12px; text-align: left;">ECS Concept</th>
+                                    <th style="padding: 12px; text-align: left;">In This Code</th>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #34495e;"><span class="highlight">Entity</span></td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #34495e;">Cube, Light, Camera</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #34495e;"><span class="highlight">Component</span></td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #34495e;">Mesh, Material, Transform</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #34495e;"><span class="highlight">System</span></td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #34495e;">setup</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px;"><span class="highlight">Resource</span></td>
+                                    <td style="padding: 10px;">Assets</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon th-flag"></div>
+                            <div class="lang-name">Thai</div>
+                        </div>
+                        <div class="content-text">
+                            <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                                <tr style="background-color: #2c3e50;">
+                                    <th style="padding: 12px; text-align: left;">แนวคิด ECS</th>
+                                    <th style="padding: 12px; text-align: left;">ในโค้ดนี้</th>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #34495e;"><span class="highlight">Entity</span></td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #34495e;">ลูกบาศก์, แสง, กล้อง</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #34495e;"><span class="highlight">Component</span></td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #34495e;">Mesh, Material, Transform</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #34495e;"><span class="highlight">System</span></td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #34495e;">setup</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px;"><span class="highlight">Resource</span></td>
+                                    <td style="padding: 10px;">Assets</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 21 -->
+            <div class="slide-container" id="slide-21" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Slide 21 — Key Takeaways</div>
+                    <div class="slide-number">21</div>
+                </div>
+                <div class="slide-content">
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon en-flag"></div>
+                            <div class="lang-name">English</div>
+                        </div>
+                        <div class="content-text">
+                            <ul style="font-size: 1.2rem;">
+                                <li style="margin-bottom: 15px;">Bevy separates data and behavior</li>
+                                <li>Lighting is essential in 3D</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon th-flag"></div>
+                            <div class="lang-name">Thai</div>
+                        </div>
+                        <div class="content-text">
+                            <ul style="font-size: 1.2rem;">
+                                <li style="margin-bottom: 15px;">Bevy แยกข้อมูลและพฤติกรรม</li>
+                                <li>แสงมีความสำคัญในกราฟิก 3D</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="page-break">Page 6</div>
+            </div>
+            
+            <!-- Slide 22 -->
+            <div class="slide-container" id="slide-22" style="display: none;">
+                <div class="slide-header">
+                    <div class="slide-title">Slide 22 — What's Next?</div>
+                    <div class="slide-number">22</div>
+                </div>
+                <div class="slide-content">
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon en-flag"></div>
+                            <div class="lang-name">English</div>
+                        </div>
+                        <div class="content-text">
+                            <ul style="font-size: 1.3rem; list-style-type: none;">
+                                <li style="margin-bottom: 15px; padding-left: 20px; position: relative;">
+                                    <i class="fas fa-sync-alt" style="position: absolute; left: 0; color: #3498db;"></i>
+                                    Rotating the cube
+                                </li>
+                                <li style="margin-bottom: 15px; padding-left: 20px; position: relative;">
+                                    <i class="fas fa-lightbulb" style="position: absolute; left: 0; color: #f1c40f;"></i>
+                                    Multiple lights
+                                </li>
+                                <li style="padding-left: 20px; position: relative;">
+                                    <i class="fas fa-code-compare" style="position: absolute; left: 0; color: #2ecc71;"></i>
+                                    Comparing Bevy vs Three.js
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="language-column">
+                        <div class="language-title">
+                            <div class="flag-icon th-flag"></div>
+                            <div class="lang-name">Thai</div>
+                        </div>
+                        <div class="content-text">
+                            <ul style="font-size: 1.3rem; list-style-type: none;">
+                                <li style="margin-bottom: 15px; padding-left: 20px; position: relative;">
+                                    <i class="fas fa-sync-alt" style="position: absolute; left: 0; color: #3498db;"></i>
+                                    ทำให้ลูกบาศก์หมุน
+                                </li>
+                                <li style="margin-bottom: 15px; padding-left: 20px; position: relative;">
+                                    <i class="fas fa-lightbulb" style="position: absolute; left: 0; color: #f1c40f;"></i>
+                                    แสงหลายดวง
+                                </li>
+                                <li style="padding-left: 20px; position: relative;">
+                                    <i class="fas fa-code-compare" style="position: absolute; left: 0; color: #2ecc71;"></i>
+                                    เปรียบเทียบ Bevy กับ Three.js
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="page-break">End of Slides <i class="fas fa-moon" style="color: #f1c40f;"></i></div>
+            </div>
+            
+            <!-- Navigation Controls -->
+            <div class="nav-controls">
+                <button class="nav-button" id="prev-btn" disabled>
+                    <i class="fas fa-chevron-left"></i> Previous Slide
+                </button>
+                
+                <div class="slide-indicator">
+                    Slide <span id="current-slide">1</span> of <span id="total-slides">22</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                </div>
+                
+                <button class="nav-button" id="next-btn">
+                    Next Slide <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            
+            <!-- Slide Thumbnails -->
+            <div class="slide-list" id="slide-list">
+                <!-- Slide thumbnails will be generated by JavaScript -->
+            </div>
+        </main>
+        
+        <footer class="footer">
+            <p>Bevy Cube + Light – Code Explanation Slides | Created with <i class="fas fa-heart"></i> for educational purposes</p>
+            <p style="margin-top: 10px;">Use the navigation buttons or click on slide numbers to navigate through the presentation</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelectorAll('.slide-container');
+            const totalSlides = slides.length;
+            let currentSlide = 0;
+            
+            // Update slide indicators
+            const currentSlideEl = document.getElementById('current-slide');
+            const totalSlidesEl = document.getElementById('total-slides');
+            const progressFill = document.getElementById('progress-fill');
+            
+            totalSlidesEl.textContent = totalSlides;
+            
+            // Navigation buttons
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            
+            // Generate slide thumbnails
+            const slideList = document.getElementById('slide-list');
+            
+            for (let i = 0; i < totalSlides; i++) {
+                const slideThumb = document.createElement('div');
+                slideThumb.className = 'slide-thumbnail';
+                slideThumb.textContent = i + 1;
+                slideThumb.dataset.slideIndex = i;
+                
+                if (i === 0) {
+                    slideThumb.classList.add('active');
+                }
+                
+                slideThumb.addEventListener('click', function() {
+                    goToSlide(parseInt(this.dataset.slideIndex));
+                });
+                
+                slideList.appendChild(slideThumb);
+            }
+            
+            // Function to update slide display
+            function updateSlideDisplay() {
+                // Hide all slides
+                slides.forEach(slide => {
+                    slide.style.display = 'none';
+                });
+                
+                // Show current slide
+                slides[currentSlide].style.display = 'flex';
+                
+                // Update indicators
+                currentSlideEl.textContent = currentSlide + 1;
+                const progress = ((currentSlide + 1) / totalSlides) * 100;
+                progressFill.style.width = `${progress}%`;
+                
+                // Update button states
+                prevBtn.disabled = currentSlide === 0;
+                nextBtn.disabled = currentSlide === totalSlides - 1;
+                
+                // Update active thumbnail
+                document.querySelectorAll('.slide-thumbnail').forEach((thumb, index) => {
+                    if (index === currentSlide) {
+                        thumb.classList.add('active');
+                    } else {
+                        thumb.classList.remove('active');
+                    }
+                });
+                
+                // Scroll to the current slide
+                slides[currentSlide].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            
+            // Function to go to a specific slide
+            function goToSlide(slideIndex) {
+                if (slideIndex >= 0 && slideIndex < totalSlides) {
+                    currentSlide = slideIndex;
+                    updateSlideDisplay();
+                }
+            }
+            
+            // Previous button event
+            prevBtn.addEventListener('click', function() {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    updateSlideDisplay();
+                }
+            });
+            
+            // Next button event
+            nextBtn.addEventListener('click', function() {
+                if (currentSlide < totalSlides - 1) {
+                    currentSlide++;
+                    updateSlideDisplay();
+                }
+            });
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'ArrowLeft') {
+                    if (currentSlide > 0) {
+                        goToSlide(currentSlide - 1);
+                    }
+                } else if (event.key === 'ArrowRight') {
+                    if (currentSlide < totalSlides - 1) {
+                        goToSlide(currentSlide + 1);
+                    }
+                } else if (event.key >= '1' && event.key <= '9') {
+                    const slideNum = parseInt(event.key) - 1;
+                    if (slideNum < totalSlides) {
+                        goToSlide(slideNum);
+                    }
+                }
+            });
+            
+            // Initialize
+            updateSlideDisplay();
+        });
+    </script>
+</body>
+</html>
