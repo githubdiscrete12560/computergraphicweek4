@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bevy Right-Handed Coordinate System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #3a86ff;
+            --secondary-purple: #8338ec;
+            --accent-red: #ff006e;
+            --dark-bg: #0f172a;
+            --medium-bg: #1e293b;
+            --light-bg: #334155;
+            --text-light: #f8fafc;
+            --text-gray: #94a3b8;
+            --code-bg: #1e1e2e;
+            --border-radius: 12px;
+            --shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-purple));
+            padding: 2rem;
+            text-align: center;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+        
+        .header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* Navigation */
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 2rem;
+            padding: 0 1rem;
+        }
+        
+        .tab-btn {
+            background-color: var(--medium-bg);
+            color: var(--text-light);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tab-btn:hover {
+            background-color: var(--light-bg);
+            transform: translateY(-3px);
+        }
+        
+        .tab-btn.active {
+            background-color: var(--primary-blue);
+            box-shadow: 0 5px 15px rgba(58, 134, 255, 0.3);
+        }
+        
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+        
+        /* Content Sections */
+        .content-section {
+            background-color: var(--medium-bg);
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--primary-blue);
+        }
+        
+        .section-icon {
+            background-color: var(--primary-blue);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .section-title {
+            font-size: 2rem;
+            color: var(--text-light);
+        }
+        
+        /* Content Grids */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .card {
+            background-color: var(--light-bg);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            transition: var(--transition);
+            border-left: 4px solid var(--primary-blue);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .card-title {
+            color: var(--primary-blue);
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* 3D Visualization */
+        .coordinate-visualization {
+            background-color: #000;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            text-align: center;
+            margin: 2rem 0;
+            border: 1px solid var(--primary-blue);
+            position: relative;
+            overflow: hidden;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #three-container {
+            width: 100%;
+            height: 500px;
+            max-width: 800px;
+            display: block;
+            border-radius: var(--border-radius);
+        }
+        
+        .visualization-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 1rem;
+            padding: 0 1rem;
+        }
+        
+        .axis-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .control-btn {
+            background-color: var(--light-bg);
+            color: var(--text-light);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background-color: var(--primary-blue);
+        }
+        
+        .cube-info {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 1rem;
+            margin-top: 1rem;
+            width: 100%;
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: var(--border-radius);
+        }
+        
+        .cube-face {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Code Examples */
+        .code-example {
+            background-color: var(--code-bg);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            border-left: 4px solid var(--accent-red);
+        }
+        
+        .code-example pre {
+            color: #f8f8f2;
+            font-family: 'Cascadia Code', 'Consolas', monospace;
+            font-size: 1rem;
+            line-height: 1.5;
+            white-space: pre;
+        }
+        
+        .code-keyword { color: #ff79c6; }
+        .code-function { color: #50fa7b; }
+        .code-type { color: #8be9fd; }
+        .code-string { color: #f1fa8c; }
+        .code-comment { color: #6272a4; }
+        .code-constant { color: #bd93f9; }
+        
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+        
+        .comparison-table th, .comparison-table td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--light-bg);
+        }
+        
+        .comparison-table th {
+            background-color: rgba(58, 134, 255, 0.2);
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .comparison-table tr:hover {
+            background-color: rgba(58, 134, 255, 0.1);
+        }
+        
+        /* Interactive Demo */
+        .interactive-demo {
+            background-color: var(--light-bg);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .demo-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+        }
+        
+        .slider-value {
+            color: var(--primary-blue);
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            -webkit-appearance: none;
+            background-color: var(--medium-bg);
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: var(--primary-blue);
+            cursor: pointer;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+            border-top: 1px solid var(--light-bg);
+            color: var(--text-gray);
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+        
+        .footer-link {
+            color: var(--primary-blue);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .footer-link:hover {
+            color: var(--accent-red);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .nav-tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .tab-btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+            
+            .content-section {
+                padding: 1.5rem;
+            }
+            
+            .section-title {
+                font-size: 1.6rem;
+            }
+            
+            #three-container {
+                height: 400px;
+            }
+            
+            .coordinate-visualization {
+                min-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <h1><i class="fas fa-hand-point-right"></i> Right-Handed Coordinate System</h1>
+        <p class="subtitle">Understanding 3D Coordinate Systems and Implementing Them in Bevy with Rust</p>
+    </header>
+    
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+        <button class="tab-btn active" data-target="concept">
+            <i class="fas fa-cube"></i> Concept
+        </button>
+        <button class="tab-btn" data-target="visualization">
+            <i class="fas fa-eye"></i> Visualization
+        </button>
+        <button class="tab-btn" data-target="bevy-implementation">
+            <i class="fas fa-code"></i> Bevy Implementation
+        </button>
+        <button class="tab-btn" data-target="bevy-implementation2">
+            <i class="fas fa-code"></i> Bevy Implementation2
+        </button>
+        <button class="tab-btn" data-target="examples">
+            <i class="fas fa-laptop-code"></i> Examples
+        </button>
+        <button class="tab-btn" data-target="common-issues">
+            <i class="fas fa-exclamation-triangle"></i> Common Issues
+        </button>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Concept Section -->
+        <section id="concept" class="content-section active">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <h2 class="section-title">Understanding Coordinate Systems</h2>
+            </div>
+            
+            <p>In 3D computer graphics, coordinate systems define how we position objects in space. The right-handed coordinate system is the standard used in mathematics, physics, and most 3D graphics frameworks including Bevy.</p>
+            
+            <div class="content-grid">
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-hand-point-right"></i> The Right-Hand Rule</h3>
+                    <p>To determine the orientation of axes in a right-handed system:</p>
+                    <ol>
+                        <li>Point your right thumb in the direction of the positive X-axis</li>
+                        <li>Extend your index finger in the direction of the positive Y-axis</li>
+                        <li>Your middle finger will point in the direction of the positive Z-axis</li>
+                    </ol>
+                </div>
+                
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-arrows-alt"></i> Axis Orientation</h3>
+                    <ul>
+                        <li><strong>X-axis:</strong> Positive to the RIGHT</li>
+                        <li><strong>Y-axis:</strong> Positive UP</li>
+                        <li><strong>Z-axis:</strong> Positive FORWARD (out of screen)</li>
+                    </ul>
+                    <p>This is consistent with OpenGL, Vulkan, and DirectX (when using row-major matrices).</p>
+                </div>
+                
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-exchange-alt"></i> Left vs Right Handed</h3>
+                    <p><strong>Right-handed:</strong> Z-axis points out of the screen when X is right and Y is up.</p>
+                    <p><strong>Left-handed:</strong> Z-axis points into the screen (used in DirectX with column-major matrices).</p>
+                    <p>Bevy uses right-handed coordinates with Y-up, which is standard in 3D mathematics.</p>
+                </div>
+            </div>
+            
+            <div class="comparison-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>System</th>
+                            <th>X-axis</th>
+                            <th>Y-axis</th>
+                            <th>Z-axis</th>
+                            <th>Used in</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Bevy (Right-handed)</strong></td>
+                            <td>Right (+) / Left (-)</td>
+                            <td>Up (+) / Down (-)</td>
+                            <td>Forward (+) / Backward (-)</td>
+                            <td>OpenGL, Vulkan, Mathematics</td>
+                        </tr>
+                        <tr>
+                            <td>Left-handed</td>
+                            <td>Right (+) / Left (-)</td>
+                            <td>Up (+) / Down (-)</td>
+                            <td>Into screen (+) / Out of screen (-)</td>
+                            <td>DirectX (sometimes), CAD software</td>
+                        </tr>
+                        <tr>
+                            <td>Unity (Left-handed)</td>
+                            <td>Right (+) / Left (-)</td>
+                            <td>Up (+) / Down (-)</td>
+                            <td>Forward (+) / Backward (-)</td>
+                            <td>Unity Engine</td>
+                        </tr>
+                        <tr>
+                            <td>Unreal (Left-handed)</td>
+                            <td>Forward (+) / Backward (-)</td>
+                            <td>Right (+) / Left (-)</td>
+                            <td>Up (+) / Down (-)</td>
+                            <td>Unreal Engine</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        
+        <!-- Visualization Section -->
+        <section id="visualization" class="content-section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <h2 class="section-title">Visualizing the Coordinate System</h2>
+            </div>
+            
+            <p>Interact with the 3D coordinate system below to understand how axes are oriented in Bevy's right-handed system. You can see a cube with colored faces positioned in 3D space.</p>
+            
+            <div class="coordinate-visualization">
+                <div class="visualization-header">
+                    <div style="color: var(--primary-blue); font-weight: bold; font-size: 1.1rem;">
+                        <i class="fas fa-cube"></i> 3D Cube in Right-Handed Coordinates (Three.js)
+                    </div>
+                    <div style="color: var(--text-gray); font-size: 0.9rem;">
+                        Left-click + drag to rotate • Right-click + drag to pan • Scroll to zoom
+                    </div>
+                </div>
+                
+                <div id="three-container"></div>
+                
+                <div class="cube-info">
+                    <div>
+                        <strong>Cube Position:</strong> 
+                        (<span id="cube-x">2.0</span>, <span id="cube-y">3.0</span>, <span id="cube-z">-4.0</span>)
+                    </div>
+                    <div>
+                        <strong>Cube Rotation:</strong> 
+                        X: <span id="cube-rx">0°</span>, Y: <span id="cube-ry">0°</span>, Z: <span id="cube-rz">0°</span>
+                    </div>
+                    <div>
+                        <strong>Faces:</strong> 
+                        <span class="cube-face" style="background-color: rgba(255, 0, 0, 0.7);"></span> +X (Right)
+                        <span class="cube-face" style="background-color: rgba(0, 255, 0, 0.7);"></span> +Y (Top)
+                        <span class="cube-face" style="background-color: rgba(0, 0, 255, 0.7);"></span> +Z (Front)
+                    </div>
+                </div>
+            </div>
+            
+            <div class="axis-controls">
+                <button class="control-btn" id="reset-view">
+                    <i class="fas fa-sync-alt"></i> Reset View
+                </button>
+                <button class="control-btn" id="toggle-wireframe">
+                    <i class="fas fa-th"></i> Toggle Wireframe
+                </button>
+                <button class="control-btn" id="toggle-axes">
+                    <i class="fas fa-arrows-alt"></i> Toggle Axes
+                </button>
+                <button class="control-btn" id="toggle-grid">
+                    <i class="fas fa-border-all"></i> Toggle Grid
+                </button>
+                <button class="control-btn" id="toggle-auto-rotate">
+                    <i class="fas fa-redo-alt"></i> Auto-Rotate
+                </button>
+            </div>
+            
+            <div class="content-grid">
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-cube"></i> Cube in 3D Space</h3>
+                    <p>The cube demonstrates how objects are positioned in Bevy:</p>
+                    <ul>
+                        <li><span style="color: #ff5555;">Red face</span> = +X direction (RIGHT)</li>
+                        <li><span style="color: #55ff55;">Green face</span> = +Y direction (UP)</li>
+                        <li><span style="color: #5555ff;">Blue face</span> = +Z direction (FORWARD)</li>
+                        <li>Opposite faces are darker shades</li>
+                    </ul>
+                    <p>The cube is positioned at (2, 3, -4) showing positive X and Y, negative Z.</p>
+                </div>
+                
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-camera"></i> Camera Orientation</h3>
+                    <p>The camera is positioned at (0, 5, 15) looking at the origin (0, 0, 0).</p>
+                    <p>This is a typical camera setup in Bevy for viewing a 3D scene.</p>
+                    <p>Notice how positive Z values go "into" the screen (away from camera) and negative Z values come "out" toward you.</p>
+                </div>
+            </div>
+            
+            <div class="interactive-demo">
+                <h3><i class="fas fa-sliders-h"></i> Interactive Cube Controls</h3>
+                <p>Adjust the sliders to position and rotate the cube in 3D space:</p>
+                
+                <div class="demo-controls">
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>X Position: <span id="x-value" class="slider-value">2.0</span></span>
+                            <span>Right (+) / Left (-)</span>
+                        </div>
+                        <input type="range" id="x-slider" min="-10" max="10" step="0.5" value="2">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Y Position: <span id="y-value" class="slider-value">3.0</span></span>
+                            <span>Up (+) / Down (-)</span>
+                        </div>
+                        <input type="range" id="y-slider" min="-10" max="10" step="0.5" value="3">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Z Position: <span id="z-value" class="slider-value">-4.0</span></span>
+                            <span>Forward (+) / Backward (-)</span>
+                        </div>
+                        <input type="range" id="z-slider" min="-10" max="10" step="0.5" value="-4">
+                    </div>
+                </div>
+                
+                <div class="demo-controls">
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>X Rotation: <span id="rx-value" class="slider-value">0°</span></span>
+                            <span>Roll</span>
+                        </div>
+                        <input type="range" id="rx-slider" min="0" max="360" step="5" value="0">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Y Rotation: <span id="ry-value" class="slider-value">0°</span></span>
+                            <span>Yaw</span>
+                        </div>
+                        <input type="range" id="ry-slider" min="0" max="360" step="5" value="0">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Z Rotation: <span id="rz-value" class="slider-value">0°</span></span>
+                            <span>Pitch</span>
+                        </div>
+                        <input type="range" id="rz-slider" min="0" max="360" step="5" value="0">
+                    </div>
+                </div>
+                
+                <div class="coordinate-display" style="text-align: center; padding: 1rem; background-color: var(--medium-bg); border-radius: var(--border-radius); margin-top: 1rem;">
+                    <h4>Current Transform: Position (<span id="current-position">2.0, 3.0, -4.0</span>) | Rotation (<span id="current-rotation">0°, 0°, 0°</span>)</h4>
+                    <p id="position-description">The cube is to the RIGHT, UP, and BACKWARD from the origin.</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Bevy Implementation Section -->
+        <section id="bevy-implementation" class="content-section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-code"></i>
+                </div>
+                <h2 class="section-title">Implementing in Bevy</h2>
+            </div>
+            
+            <p>Bevy uses the right-handed coordinate system by default. Here's how to work with it in your Rust code:</p>
+            
+            <div class="code-example">
+                <h3><i class="fas fa-file-code"></i> Creating a Cube in Bevy</h3>
+                <pre><code><span class="code-keyword">use</span> bevy::prelude::*;
+
+<span class="code-keyword">fn</span> <span class="code-function">setup</span>(<span class="code-keyword">mut</span> commands: Commands, <span class="code-keyword">mut</span> meshes: ResMut&lt;Assets&lt;Mesh&gt;&gt;, <span class="code-keyword">mut</span> materials: ResMut&lt;Assets&lt;StandardMaterial&gt;&gt;) {
+    <span class="code-comment">// Spawn a cube at position (2, 3, -4) with colored faces</span>
+    commands.<span class="code-function">spawn</span>(PbrBundle {
+        mesh: meshes.<span class="code-function">add</span>(Cuboid::<span class="code-function">new</span>(<span class="code-constant">1.0</span>, <span class="code-constant">1.0</span>, <span class="code-constant">1.0</span>)),
+        material: materials.<span class="code-function">add</span>(StandardMaterial {
+            base_color: Color::<span class="code-function">srgb</span>(<span class="code-constant">0.8</span>, <span class="code-constant">0.7</span>, <span class="code-constant">0.6</span>), <span class="code-comment">// Beige color</span>
+            ..<span class="code-function">default</span>()
+        }),
+        transform: Transform::<span class="code-function">from_xyz</span>(<span class="code-constant">2.0</span>, <span class="code-constant">3.0</span>, -<span class="code-constant">4.0</span>),
+        ..<span class="code-function">default</span>()
+    });
+    
+    <span class="code-comment">// Camera setup for viewing</span>
+    commands.<span class="code-function">spawn</span>(Camera3dBundle {
+        transform: Transform::<span class="code-function">from_xyz</span>(<span class="code-constant">0.0</span>, <span class="code-constant">5.0</span>, <span class="code-constant">15.0</span>)
+            .<span class="code-function">looking_at</span>(Vec3::ZERO, Vec3::Y),
+        ..<span class="code-function">default</span>()
+    });
+}</code></pre>
+            </div>
+        </section>
+        
+        <!-- Bevy Implementation Section -->
+        <section id="bevy-implementation2" class="content-section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-code"></i>
+                </div>
+                <h2 class="section-title">Implementing in Bevy</h2>
+            </div>
+            
+            <p>Bevy uses the right-handed coordinate system by default. Here's how to work with it in your Rust code:</p>
+            
+            <div class="code-example">
+                <h3><i class="fas fa-file-code"></i> Basic Coordinate Usage in Bevy</h3>
+                <pre><code><span class="code-keyword">use</span> bevy::prelude::*;
+
+<span class="code-keyword">fn</span> <span class="code-function">setup</span>(<span class="code-keyword">mut</span> commands: Commands) {
+    <span class="code-comment">// Spawn a cube at position (2, 3, -4) in world space</span>
+    <span class="code-comment">// X: 2 units to the RIGHT</span>
+    <span class="code-comment">// Y: 3 units UP</span>
+    <span class="code-comment">// Z: -4 units BACKWARD (into the screen)</span>
+    commands.<span class="code-function">spawn</span>((
+        PbrBundle {
+            mesh: <span class="code-comment">// mesh creation omitted for brevity</span>,
+            material: <span class="code-comment">// material creation omitted</span>,
+            transform: Transform::<span class="code-function">from_xyz</span>(<span class="code-constant">2.0</span>, <span class="code-constant">3.0</span>, -<span class="code-constant">4.0</span>),
+            ..default()
+        },
+    ));
+    
+    <span class="code-comment">// Position a camera at (5, 5, 10) looking at the origin</span>
+    commands.<span class="code-function">spawn</span>(Camera3dBundle {
+        transform: Transform::<span class="code-function">from_xyz</span>(<span class="code-constant">5.0</span>, <span class="code-constant">5.0</span>, <span class="code-constant">10.0</span>)
+            .<span class="code-function">looking_at</span>(Vec3::ZERO, Vec3::Y),
+        ..default()
+    });
+}</code></pre>
+            </div>
+            
+            <div class="content-grid">
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-vector-square"></i> Transform Operations</h3>
+                    <p>Bevy's Transform component works with right-handed coordinates:</p>
+                    <div class="code-example" style="margin-top: 1rem;">
+                        <pre><code><span class="code-keyword">let</span> <span class="code-keyword">mut</span> transform = Transform::<span class="code-function">from_xyz</span>(<span class="code-constant">0.0</span>, <span class="code-constant">0.0</span>, <span class="code-constant">0.0</span>);
+
+<span class="code-comment">// Move right (positive X)</span>
+transform.translation.x += <span class="code-constant">1.0</span>;
+
+<span class="code-comment">// Move up (positive Y)</span>
+transform.translation.y += <span class="code-constant">2.0</span>;
+
+<span class="code-comment">// Move forward (positive Z) - away from camera</span>
+transform.translation.z += <span class="code-constant">3.0</span>;
+
+<span class="code-comment">// Rotate around the Y-axis (up axis)</span>
+transform.<span class="code-function">rotate_y</span>(<span class="code-constant">0.5</span>);</code></pre>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-layer-group"></i> Direction Constants</h3>
+                    <p>Bevy provides constants for common directions:</p>
+                    <div class="code-example" style="margin-top: 1rem;">
+                        <pre><code><span class="code-keyword">use</span> bevy::prelude::*;
+
+<span class="code-comment">// Unit vectors for each axis</span>
+<span class="code-keyword">let</span> right = Vec3::X;    <span class="code-comment">// (1, 0, 0)</span>
+<span class="code-keyword">let</span> left = -Vec3::X;     <span class="code-comment">// (-1, 0, 0)</span>
+<span class="code-keyword">let</span> up = Vec3::Y;        <span class="code-comment">// (0, 1, 0)</span>
+<span class="code-keyword">let</span> down = -Vec3::Y;     <span class="code-comment">// (0, -1, 0)</span>
+<span class="code-keyword">let</span> forward = Vec3::Z;   <span class="code-comment">// (0, 0, 1) - INTO the screen</span>
+<span class="code-keyword">let</span> back = -Vec3::Z;     <span class="code-comment">// (0, 0, -1) - OUT OF the screen</span>
+
+<span class="code-comment">// Common combinations</span>
+<span class="code-keyword">let</span> up_right = Vec3::<span class="code-function">new</span>(<span class="code-constant">1.0</span>, <span class="code-constant">1.0</span>, <span class="code-constant">0.0</span>);
+<span class="code-keyword">let</span> forward_up = Vec3::<span class="code-function">new</span>(<span class="code-constant">0.0</span>, <span class="code-constant">1.0</span>, <span class="code-constant">1.0</span>);</code></pre>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="code-example">
+                <h3><i class="fas fa-camera"></i> Camera Setup for Right-Handed System</h3>
+                <pre><code><span class="code-keyword">fn</span> <span class="code-function">setup_camera</span>(<span class="code-keyword">mut</span> commands: Commands) {
+    <span class="code-comment">// Position camera with Z offset for forward/backward movement</span>
+    <span class="code-comment">// In Bevy, positive Z goes INTO the screen</span>
+    <span class="code-comment">// So to see objects at the origin, we put camera at positive Z</span>
+    commands.<span class="code-function">spawn</span>(Camera3dBundle {
+        transform: Transform::<span class="code-function">from_xyz</span>(<span class="code-constant">0.0</span>, <span class="code-constant">2.0</span>, <span class="code-constant">5.0</span>) <span class="code-comment">// 5 units "forward" from origin</span>
+            .<span class="code-function">looking_at</span>(Vec3::<span class="code-function">new</span>(<span class="code-constant">0.0</span>, <span class="code-constant">0.0</span>, <span class="code-constant">0.0</span>), Vec3::Y),
+        ..default()
+    });
+}
+
+<span class="code-comment">// Camera movement system</span>
+<span class="code-keyword">fn</span> <span class="code-function">move_camera</span>(
+    time: Res&lt;Time&gt;,
+    keyboard_input: Res&lt;Input&lt;KeyCode&gt;&gt;,
+    <span class="code-keyword">mut</span> query: Query&lt;&<span class="code-keyword">mut</span> Transform, With&lt;Camera&gt;&gt;,
+) {
+    <span class="code-keyword">for</span> <span class="code-keyword">mut</span> transform <span class="code-keyword">in</span> query.<span class="code-function">iter_mut</span>() {
+        <span class="code-keyword">let</span> speed = <span class="code-constant">5.0</span> * time.<span class="code-function">delta_seconds</span>();
+        
+        <span class="code-keyword">if</span> keyboard_input.<span class="code-function">pressed</span>(KeyCode::D) {
+            <span class="code-comment">// Move camera RIGHT (positive X)</span>
+            transform.translation.x += speed;
+        }
+        <span class="code-keyword">if</span> keyboard_input.<span class="code-function">pressed</span>(KeyCode::A) {
+            <span class="code-comment">// Move camera LEFT (negative X)</span>
+            transform.translation.x -= speed;
+        }
+        <span class="code-keyword">if</span> keyboard_input.<span class="code-function">pressed</span>(KeyCode::W) {
+            <span class="code-comment">// Move camera FORWARD (positive Z) - into screen</span>
+            transform.translation.z += speed;
+        }
+        <span class="code-keyword">if</span> keyboard_input.<span class="code-function">pressed</span>(KeyCode::S) {
+            <span class="code-comment">// Move camera BACKWARD (negative Z) - out of screen</span>
+            transform.translation.z -= speed;
+        }
+    }
+}</code></pre>
+            </div>
+        </section>
+
+
+
+
+        <!-- Examples Section -->
+        <section id="examples" class="content-section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-laptop-code"></i>
+                </div>
+                <h2 class="section-title">Practical Examples</h2>
+            </div>
+            
+            <p>Here are complete examples demonstrating right-handed coordinates in Bevy applications:</p>
+            
+            <div class="content-grid">
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-gamepad"></i> First-Person Camera</h3>
+                    <div class="code-example" style="margin-top: 1rem;">
+                        <pre><code><span class="code-keyword">use</span> bevy::prelude::*;
+
+<span class="code-keyword">fn</span> <span class="code-function">setup_first_person</span>(<span class="code-keyword">mut</span> commands: Commands) {
+    <span class="code-comment">// Player entity with camera attached</span>
+    commands.<span class="code-function">spawn</span>((
+        PbrBundle {
+            transform: Transform::<span class="code-function">from_xyz</span>(<span class="code-constant">0.0</span>, <span class="code-constant">1.0</span>, <span class="code-constant">0.0</span>),
+            ..default()
+        },
+        Camera3dBundle {
+            transform: Transform::<span class="code-function">from_xyz</span>(<span class="code-constant">0.0</span>, <span class="code-constant">1.8</span>, <span class="code-constant">0.0</span>),
+            ..default()
+        },
+        FirstPersonCamera,
+    ));
+}
+
+<span class="code-comment">// System to handle first-person movement</span>
+<span class="code-keyword">fn</span> <span class="code-function">first_person_movement</span>(
+    time: Res&lt;Time&gt;,
+    keyboard_input: Res&lt;Input&lt;KeyCode&gt;&gt;,
+    <span class="code-keyword">mut</span> query: Query&lt;&<span class="code-keyword">mut</span> Transform, With&lt;FirstPersonCamera&gt;&gt;,
+) {
+    <span class="code-keyword">for</span> <span class="code-keyword">mut</span> transform <span class="code-keyword">in</span> query.<span class="code-function">iter_mut</span>() {
+        <span class="code-keyword">let</span> <span class="code-keyword">mut</span> velocity = Vec3::ZERO;
+        <span class="code-keyword">let</span> speed = <span class="code-constant">5.0</span> * time.<span class="code-function">delta_seconds</span>();
+        
+        <span class="code-comment">// Forward/Backward along camera's forward vector</span>
+        <span class="code-keyword">let</span> forward = transform.forward();
+        <span class="code-keyword">let</span> right = transform.right();
+        
+        <span class="code-keyword">if</span> keyboard_input.<span class="code-function">pressed</span>(KeyCode::W) {
+            velocity += forward * speed;
+        }
+        <span class="code-keyword">if</span> keyboard_input.<span class="code-function">pressed</span>(KeyCode::S) {
+            velocity -= forward * speed;
+        }
+        <span class="code-keyword">if</span> keyboard_input.<span class="code-function">pressed</span>(KeyCode::D) {
+            velocity += right * speed;
+        }
+        <span class="code-keyword">if</span> keyboard_input.<span class="code-function">pressed</span>(KeyCode::A) {
+            velocity -= right * speed;
+        }
+        
+        transform.translation += velocity;
+    }
+}</code></pre>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-sitemap"></i> Object Hierarchy</h3>
+                    <div class="code-example" style="margin-top: 1rem;">
+                        <pre><code><span class="code-keyword">fn</span> <span class="code-function">setup_hierarchy</span>(<span class="code-keyword">mut</span> commands: Commands) {
+    <span class="code-comment">// Parent entity at origin</span>
+    <span class="code-keyword">let</span> parent_id = commands
+        .<span class="code-function">spawn</span>((
+            TransformBundle::<span class="code-function">from_transform</span>(
+                Transform::<span class="code-function">from_xyz</span>(<span class="code-constant">0.0</span>, <span class="code-constant">0.0</span>, <span class="code-constant">0.0</span>)
+            ),
+        ))
+        .<span class="code-function">id</span>();
+    
+    <span class="code-comment">// Child entity - position is RELATIVE to parent</span>
+    commands.<span class="code-function">spawn</span>((
+        PbrBundle {
+            mesh: <span class="code-comment">// ...</span>,
+            material: <span class="code-comment">// ...</span>,
+            transform: Transform::<span class="code-function">from_xyz</span>(<span class="code-constant">2.0</span>, <span class="code-constant">0.0</span>, <span class="code-constant">0.0</span>), <span class="code-comment">// 2 units right of parent</span>
+            ..default()
+        },
+        SpatialBundle::<span class="code-function">default</span>(),
+    )).<span class="code-function">set_parent</span>(parent_id);
+    
+    <span class="code-comment">// When parent moves, child moves with it</span>
+    <span class="code-comment">// Child's world position = parent position + child's local position</span>
+}</code></pre>
+                    </div>
+                    <p>In hierarchies, child positions are relative to their parent's coordinate system.</p>
+                </div>
+            </div>
+            
+            <div class="code-example">
+                <h3><i class="fas fa-arrows-alt"></i> Complete 3D Scene Example</h3>
+                <pre><code><span class="code-keyword">use</span> bevy::prelude::*;
+
+<span class="code-keyword">fn</span> <span class="code-function">main</span>() {
+    App::<span class="code-function">new</span>()
+        .<span class="code-function">add_plugins</span>(DefaultPlugins)
+        .<span class="code-function">add_systems</span>(Startup, setup_scene)
+        .<span class="code-function">add_systems</span>(Update, (rotate_objects, move_camera))
+        .<span class="code-function">run</span>();
+}
+
+<span class="code-keyword">fn</span> <span class="code-function">setup_scene</span>(
+    <span class="code-keyword">mut</span> commands: Commands,
+    <span class="code-keyword">mut</span> meshes: ResMut&lt;Assets&lt;Mesh&gt;&gt;,
+    <span class="code-keyword">mut</span> materials: ResMut&lt;Assets&lt;StandardMaterial&gt;&gt;,
+) {
+    <span class="code-comment">// Ground plane at y = -1 (1 unit down)</span>
+    commands.<span class="code-function">spawn</span>(PbrBundle {
+        mesh: meshes.<span class="code-function">add</span>(Plane3d::<span class="code-function">default</span>().<span class="code-function">mesh</span>().<span class="code-function">size</span>(<span class="code-constant">10.0</span>, <span class="code-constant">10.0</span>)),
+        material: materials.<span class="code-function">add</span>(Color::<span class="code-function">srgb</span>(<span class="code-constant">0.3</span>, <span class="code-constant">0.5</span>, <span class="code-constant">0.3</span>)),
+        transform: Transform::<span class="code-function">from_xyz</span>(<span class="code-constant">0.0</span>, -<span class="code-constant">1.0</span>, <span class="code-constant">0.0</span>),
+        ..default()
+    });
+    
+    <span class="code-comment">// Objects placed using right-handed coordinates</span>
+    <span class="code-comment">// Red cube: Right side of scene</span>
+    commands.<span class="code-function">spawn</span>(PbrBundle {
+        mesh: meshes.<span class="code-function">add</span>(Cuboid::<span class="code-function">new</span>(<span class="code-constant">1.0</span>, <span class="code-constant">1.0</span>, <span class="code-constant">1.0</span>)),
+        material: materials.<span class="code-function">add</span>(Color::<span class="code-function">srgb</span>(<span class="code-constant">1.0</span>, <span class="code-constant">0.0</span>, <span class="code-constant">0.0</span>)),
+        transform: Transform::<span class="code-function">from_xyz</span>(<span class="code-constant">3.0</span>, <span class="code-constant">0.0</span>, <span class="code-constant">0.0</span>), <span class="code-comment">// Right</span>
+        ..default()
+    });
+    
+    <span class="code-comment">// Green cube: Left side of scene</span>
+    commands.<span class="code-function">spawn</span>(PbrBundle {
+        mesh: meshes.<span class="code-function">add</span>(Cuboid::<span class="code-function">new</span>(<span class="code-constant">1.0</span>, <span class="code-constant">1.0</span>, <span class="code-constant">1.0</span>)),
+        material: materials.<span class="code-function">add</span>(Color::<span class="code-function">srgb</span>(<span class="code-constant">0.0</span>, <span class="code-constant">1.0</span>, <span class="code-constant">0.0</span>)),
+        transform: Transform::<span class="code-function">from_xyz</span>(-<span class="code-constant">3.0</span>, <span class="code-constant">0.0</span>, <span class="code-constant">0.0</span>), <span class="code-comment">// Left</span>
+        ..default()
+    });
+    
+    <span class="code-comment">// Blue cube: Forward (into screen)</span>
+    commands.<span class="code-function">spawn</span>(PbrBundle {
+        mesh: meshes.<span class="code-function">add</span>(Cuboid::<span class="code-function">new</span>(<span class="code-constant">1.0</span>, <span class="code-constant">1.0</span>, <span class="code-constant">1.0</span>)),
+        material: materials.<span class="code-function">add</span>(Color::<span class="code-function">srgb</span>(<span class="code-constant">0.0</span>, <span class="code-constant">0.0</span>, <span class="code-constant">1.0</span>)),
+        transform: Transform::<span class="code-function">from_xyz</span>(<span class="code-constant">0.0</span>, <span class="code-constant">0.0</span>, <span class="code-constant">3.0</span>), <span class="code-comment">// Forward</span>
+        ..default()
+    });
+    
+    <span class="code-comment">// Light above scene</span>
+    commands.<span class="code-function">spawn</span>(PointLightBundle {
+        point_light: PointLight {
+            intensity: <span class="code-constant">1500.0</span>,
+            shadows_enabled: <span class="code-keyword">true</span>,
+            ..default()
+        },
+        transform: Transform::<span class="code-function">from_xyz</span>(<span class="code-constant">4.0</span>, <span class="code-constant">8.0</span>, <span class="code-constant">4.0</span>),
+        ..default()
+    });
+    
+    <span class="code-comment">// Camera positioned to view the scene</span>
+    commands.<span class="code-function">spawn</span>(Camera3dBundle {
+        transform: Transform::<span class="code-function">from_xyz</span>(<span class="code-constant">0.0</span>, <span class="code-constant">5.0</span>, <span class="code-constant">10.0</span>) <span class="code-comment">// Backward from scene</span>
+            .<span class="code-function">looking_at</span>(Vec3::ZERO, Vec3::Y),
+        ..default()
+    });
+}
+
+<span class="code-comment">// Rotate all cubes around their Y axis (up axis)</span>
+<span class="code-keyword">fn</span> <span class="code-function">rotate_objects</span>(
+    time: Res&lt;Time&gt;,
+    <span class="code-keyword">mut</span> query: Query&lt;&<span class="code-keyword">mut</span> Transform, With&lt;Handle&lt;Mesh&gt;&gt;&gt;,
+) {
+    <span class="code-keyword">for</span> <span class="code-keyword">mut</span> transform <span class="code-keyword">in</span> query.<span class="code-function">iter_mut</span>() {
+        transform.<span class="code-function">rotate_y</span>(<span class="code-constant">0.5</span> * time.<span class="code-function">delta_seconds</span>());
+    }
+}</code></pre>
+            </div>
+        </section>
+        
+        <!-- Common Issues Section -->
+        <section id="common-issues" class="content-section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h2 class="section-title">Common Issues & Solutions</h2>
+            </div>
+            
+            <p>When working with Bevy's coordinate system, developers often encounter these issues:</p>
+            
+            <div class="content-grid">
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-question-circle"></i> Issue 1: "My objects appear backwards!"</h3>
+                    <p><strong>Problem:</strong> Objects appear mirrored or facing the wrong direction.</p>
+                    <p><strong>Cause:</strong> Incorrect understanding of forward direction in right-handed system.</p>
+                    <p><strong>Solution:</strong> Remember that positive Z is <em>into</em> the screen (forward).</p>
+                    <div class="code-example" style="margin-top: 1rem; font-size: 0.9rem;">
+                        <pre><code><span class="code-comment">// To make an object face the camera (if camera is at positive Z)</span>
+transform.<span class="code-function">looking_at</span>(Vec3::<span class="code-function">new</span>(<span class="code-constant">0.0</span>, <span class="code-constant">0.0</span>, -<span class="code-constant">1.0</span>), Vec3::Y);
+
+<span class="code-comment">// Or rotate 180 degrees around Y axis</span>
+transform.rotation = Quat::<span class="code-function">from_rotation_y</span>(std::f32::consts::PI);</code></pre>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-camera"></i> Issue 2: "Camera movement feels inverted"</h3>
+                    <p><strong>Problem:</strong> Pressing 'W' moves camera away from objects instead of toward them.</p>
+                    <p><strong>Cause:</strong> Confusion between camera-relative and world-relative movement.</p>
+                    <p><strong>Solution:</strong> Use camera's forward vector for movement.</p>
+                    <div class="code-example" style="margin-top: 1rem; font-size: 0.9rem;">
+                        <pre><code><span class="code-keyword">fn</span> <span class="code-function">move_camera_relative</span>(
+    <span class="code-keyword">mut</span> camera_query: Query&lt;&<span class="code-keyword">mut</span> Transform, With&lt;Camera&gt;&gt;,
+) {
+    <span class="code-keyword">for</span> <span class="code-keyword">mut</span> transform <span class="code-keyword">in</span> camera_query.<span class="code-function">iter_mut</span>() {
+        <span class="code-comment">// Move in the direction the camera is facing</span>
+        <span class="code-keyword">let</span> forward = transform.forward(); <span class="code-comment">// Vector pointing where camera looks</span>
+        transform.translation += forward * <span class="code-constant">0.1</span>;
+        
+        <span class="code-comment">// Or move in world-relative direction</span>
+        <span class="code-comment">// transform.translation.z += 0.1; // Moves into screen</span>
+    }
+}</code></pre>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-file-import"></i> Issue 3: Importing 3D models</h3>
+                    <p><strong>Problem:</strong> 3D models from other software appear rotated or scaled incorrectly.</p>
+                    <p><strong>Cause:</strong> Different software uses different coordinate systems.</p>
+                    <p><strong>Solution:</strong> Apply correction transforms during import.</p>
+                    <div class="code-example" style="margin-top: 1rem; font-size: 0.9rem;">
+                        <pre><code><span class="code-comment">// When loading a model that was created in a different coordinate system</span>
+commands.<span class="code-function">spawn</span>(SceneBundle {
+    scene: asset_server.<span class="code-function">load</span>(<span class="code-string">"models/my_model.glb#Scene0"</span>),
+    transform: Transform::<span class="code-function">from_scale</span>(Vec3::<span class="code-function">splat</span>(<span class="code-constant">1.0</span>))
+        .<span class="code-function">with_rotation</span>(Quat::<span class="code-function">from_rotation_y</span>(std::f32::consts::PI)),
+    ..default()
+});
+
+<span class="code-comment">// Common conversions:</span>
+<span class="code-comment">// Unity (left-handed, Y-up) → Bevy: Rotate 180° around Y</span>
+<span class="code-comment">// Blender (right-handed, Z-up) → Bevy: Rotate -90° around X</span>
+<span class="code-comment">// Maya (right-handed, Y-up) → Bevy: Usually no rotation needed</span></code></pre>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="comparison-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Issue</th>
+                            <th>Symptom</th>
+                            <th>Cause</th>
+                            <th>Fix</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Backwards rotation</strong></td>
+                            <td>Objects rotate opposite to expected direction</td>
+                            <td>Negative angle used for positive rotation</td>
+                            <td>Swap rotation direction or check coordinate system</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Upside-down models</strong></td>
+                            <td>Models appear flipped vertically</td>
+                            <td>Source software uses different up axis</td>
+                            <td>Apply rotation: Quat::from_rotation_x(-PI/2)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Wrong depth sorting</strong></td>
+                            <td>Objects that should be behind appear in front</td>
+                            <td>Z-values reversed or near/far plane issues</td>
+                            <td>Check camera projection and object Z positions</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Movement feels wrong</strong></td>
+                            <td>Controls don't move character as expected</td>
+                            <td>Using world axes instead of local axes</td>
+                            <td>Use transform.forward()/right() for local movement</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="card" style="margin-top: 2rem; background-color: rgba(255, 0, 110, 0.1); border-left-color: var(--accent-red);">
+                <h3 class="card-title"><i class="fas fa-lightbulb"></i> Pro Tip: Debug Visualization</h3>
+                <p>Enable Bevy's coordinate axis visualization to debug placement issues:</p>
+                <div class="code-example" style="margin-top: 1rem;">
+                    <pre><code><span class="code-comment">// In your Bevy app setup</span>
+.<span class="code-function">add_plugins</span>(DefaultPlugins.<span class="code-function">set</span>(WindowPlugin {
+    primary_window: <span class="code-type">Some</span>(Window {
+        title: <span class="code-string">"Coordinate Debug"</span>.<span class="code-function">into</span>(),
+        ..default()
+    }),
+    ..default()
+}))
+.<span class="code-function">add_systems</span>(Startup, |<span class="code-keyword">mut</span> commands: Commands| {
+    <span class="code-comment">// Spawn coordinate axes at origin for reference</span>
+    commands.<span class="code-function">spawn</span>((
+        TransformBundle::<span class="code-function">default</span>(),
+        <span class="code-comment">// In practice, you'd use a custom mesh or gizmo</span>
+        <span class="code-comment">// to draw X (red), Y (green), Z (blue) axes</span>
+    ));
+});</code></pre>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Bevy Right-Handed Coordinate System Tutorial</p>
+            <p>Understanding coordinate systems is fundamental to 3D graphics programming.</p>
+            <div class="footer-links">
+                <a href="https://bevyengine.org/learn/" class="footer-link" target="_blank">
+                    <i class="fas fa-book"></i> Bevy Documentation
+                </a>
+                <a href="https://github.com/bevyengine/bevy" class="footer-link" target="_blank">
+                    <i class="fab fa-github"></i> Bevy GitHub
+                </a>
+                <a href="https://www.rust-lang.org/" class="footer-link" target="_blank">
+                    <i class="fas fa-cog"></i> Rust Language
+                </a>
+            </div>
+            <p style="margin-top: 1rem; font-size: 0.9rem;">Tip: Always visualize your coordinate system when debugging 3D placement issues!</p>
+        </footer>
+    </div>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- OrbitControls for camera interaction -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    
+    <script>
+        // Tab Navigation
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const contentSections = document.querySelectorAll('.content-section');
+        
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetId = button.getAttribute('data-target');
+                
+                // Update active tab button
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                // Show target section
+                contentSections.forEach(section => {
+                    section.classList.remove('active');
+                    if (section.id === targetId) {
+                        section.classList.add('active');
+                    }
+                });
+            });
+        });
+        
+        // Three.js Visualization
+        let scene, camera, renderer, controls;
+        let cube, axesHelper, gridHelper;
+        let wireframe = false;
+        let autoRotate = false;
+        let animationId = null;
+        
+        // Cube properties (in Bevy's coordinate system: X=right, Y=up, Z=forward)
+        let cubePosition = { x: 2, y: 3, z: -4 };
+        let cubeRotation = { x: 0, y: 0, z: 0 }; // In degrees
+        
+        // Initialize Three.js scene
+        function initThreeJS() {
+            // Get container
+            const container = document.getElementById('three-container');
+            
+            // Create scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a0a);
+            
+            // Create camera (position matches Bevy example: (0, 5, 15) looking at origin)
+            camera = new THREE.PerspectiveCamera(
+                60, // Field of view
+                container.clientWidth / container.clientHeight, // Aspect ratio
+                0.1, // Near clipping plane
+                1000 // Far clipping plane
+            );
+            camera.position.set(0, 5, 15);
+            camera.lookAt(0, 0, 0);
+            
+            // Create renderer
+            renderer = new THREE.WebGLRenderer({ 
+                antialias: true,
+                alpha: true
+            });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+            
+            // Add OrbitControls for camera interaction
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.screenSpacePanning = false;
+            controls.minDistance = 5;
+            controls.maxDistance = 50;
+            controls.maxPolarAngle = Math.PI; // Allow looking from all angles
+            
+            // Add lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 15);
+            scene.add(directionalLight);
+            
+            // Create colored cube with right-handed coordinate colors
+            createCube();
+            
+            // Create coordinate axes (X=red, Y=green, Z=blue)
+            axesHelper = new THREE.AxesHelper(5);
+            scene.add(axesHelper);
+            
+            // Create grid helper (XZ plane)
+            gridHelper = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
+            gridHelper.position.y = -0.01; // Slightly below origin to avoid z-fighting
+            scene.add(gridHelper);
+            
+            // Create origin point
+            const originGeometry = new THREE.SphereGeometry(0.1, 16, 16);
+            const originMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const originSphere = new THREE.Mesh(originGeometry, originMaterial);
+            scene.add(originSphere);
+            
+            // Add labels for axes
+            addAxisLabels();
+            
+            // Start animation loop
+            animate();
+            
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize);
+        }
+        
+        function createCube() {
+            // Remove existing cube if present
+            if (cube) {
+                scene.remove(cube);
+            }
+            
+            // Create a cube with different colored faces
+            const cubeSize = 1;
+            
+            // Create materials for each face
+            const materials = [
+                new THREE.MeshStandardMaterial({ color: 0x888888 }), // -X (left) - gray
+                new THREE.MeshStandardMaterial({ color: 0xff0000 }), // +X (right) - red
+                new THREE.MeshStandardMaterial({ color: 0x888888 }), // -Y (bottom) - gray
+                new THREE.MeshStandardMaterial({ color: 0x00ff00 }), // +Y (top) - green
+                new THREE.MeshStandardMaterial({ color: 0x888888 }), // -Z (back) - gray
+                new THREE.MeshStandardMaterial({ color: 0x0000ff })  // +Z (front) - blue
+            ];
+            
+            // Create cube geometry
+            const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+            
+            // Create mesh with face materials
+            cube = new THREE.Mesh(geometry, materials);
+            
+            // Set initial position and rotation
+            cube.position.set(cubePosition.x, cubePosition.y, cubePosition.z);
+            cube.rotation.set(
+                THREE.MathUtils.degToRad(cubeRotation.x),
+                THREE.MathUtils.degToRad(cubeRotation.y),
+                THREE.MathUtils.degToRad(cubeRotation.z)
+            );
+            
+            // Add wireframe for better visibility
+            const wireframeGeometry = new THREE.EdgesGeometry(geometry);
+            const wireframeMaterial = new THREE.LineBasicMaterial({ 
+                color: 0xffffff, 
+                linewidth: 1,
+                transparent: true,
+                opacity: 0.3
+            });
+            const wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
+            cube.add(wireframe);
+            
+            scene.add(cube);
+        }
+        
+        function addAxisLabels() {
+            // Create a group for labels
+            const labels = new THREE.Group();
+            
+            // Create text sprites for axis labels (simplified approach)
+            const createLabel = (text, position, color) => {
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = 64;
+                canvas.height = 64;
+                
+                context.fillStyle = 'rgba(0, 0, 0, 0)';
+                context.fillRect(0, 0, 64, 64);
+                
+                context.font = 'bold 40px Arial';
+                context.fillStyle = color;
+                context.textAlign = 'center';
+                context.textBaseline = 'middle';
+                context.fillText(text, 32, 32);
+                
+                const texture = new THREE.CanvasTexture(canvas);
+                const material = new THREE.SpriteMaterial({ map: texture });
+                const sprite = new THREE.Sprite(material);
+                sprite.position.copy(position);
+                sprite.scale.set(1, 1, 1);
+                
+                return sprite;
+            };
+            
+            // Add labels for each axis (positive direction)
+            labels.add(createLabel('X+', new THREE.Vector3(5.5, 0, 0), '#ff5555'));
+            labels.add(createLabel('Y+', new THREE.Vector3(0, 5.5, 0), '#55ff55'));
+            labels.add(createLabel('Z+', new THREE.Vector3(0, 0, 5.5), '#5555ff'));
+            
+            // Add labels for negative directions
+            labels.add(createLabel('X-', new THREE.Vector3(-5.5, 0, 0), '#ff5555'));
+            labels.add(createLabel('Y-', new THREE.Vector3(0, -5.5, 0), '#55ff55'));
+            labels.add(createLabel('Z-', new THREE.Vector3(0, 0, -5.5), '#5555ff'));
+            
+            scene.add(labels);
+        }
+        
+        function onWindowResize() {
+            const container = document.getElementById('three-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+        
+        function animate() {
+            animationId = requestAnimationFrame(animate);
+            
+            // Auto-rotate the scene if enabled
+            if (autoRotate) {
+                controls.autoRotate = true;
+                controls.update();
+            } else {
+                controls.autoRotate = false;
+            }
+            
+            // Update cube rotation if auto-rotate is enabled
+            if (autoRotate) {
+                cubeRotation.y = (cubeRotation.y + 0.5) % 360;
+                cube.rotation.y = THREE.MathUtils.degToRad(cubeRotation.y);
+                updateDisplay();
+            }
+            
+            // Update controls
+            controls.update();
+            
+            // Render scene
+            renderer.render(scene, camera);
+        }
+        
+        // Update display elements
+        function updateDisplay() {
+            document.getElementById('cube-x').textContent = cubePosition.x.toFixed(1);
+            document.getElementById('cube-y').textContent = cubePosition.y.toFixed(1);
+            document.getElementById('cube-z').textContent = cubePosition.z.toFixed(1);
+            document.getElementById('cube-rx').textContent = Math.round(cubeRotation.x) + "°";
+            document.getElementById('cube-ry').textContent = Math.round(cubeRotation.y) + "°";
+            document.getElementById('cube-rz').textContent = Math.round(cubeRotation.z) + "°";
+            
+            document.getElementById('current-position').textContent = 
+                `${cubePosition.x.toFixed(1)}, ${cubePosition.y.toFixed(1)}, ${cubePosition.z.toFixed(1)}`;
+            document.getElementById('current-rotation').textContent = 
+                `${Math.round(cubeRotation.x)}°, ${Math.round(cubeRotation.y)}°, ${Math.round(cubeRotation.z)}°`;
+            
+            // Update description
+            let desc = "The cube is ";
+            desc += cubePosition.x > 0 ? "RIGHT " : (cubePosition.x < 0 ? "LEFT " : "CENTER ");
+            desc += cubePosition.y > 0 ? "UP " : (cubePosition.y < 0 ? "DOWN " : "");
+            desc += cubePosition.z > 0 ? "FORWARD" : (cubePosition.z < 0 ? "BACKWARD" : "CENTER");
+            desc += " from the origin.";
+            document.getElementById('position-description').textContent = desc;
+        }
+        
+        // Update cube from sliders
+        const xSlider = document.getElementById('x-slider');
+        const ySlider = document.getElementById('y-slider');
+        const zSlider = document.getElementById('z-slider');
+        const rxSlider = document.getElementById('rx-slider');
+        const rySlider = document.getElementById('ry-slider');
+        const rzSlider = document.getElementById('rz-slider');
+        
+        const xValue = document.getElementById('x-value');
+        const yValue = document.getElementById('y-value');
+        const zValue = document.getElementById('z-value');
+        const rxValue = document.getElementById('rx-value');
+        const ryValue = document.getElementById('ry-value');
+        const rzValue = document.getElementById('rz-value');
+        
+        function updateCubeFromSliders() {
+            cubePosition.x = parseFloat(xSlider.value);
+            cubePosition.y = parseFloat(ySlider.value);
+            cubePosition.z = parseFloat(zSlider.value);
+            
+            cubeRotation.x = parseFloat(rxSlider.value);
+            cubeRotation.y = parseFloat(rySlider.value);
+            cubeRotation.z = parseFloat(rzSlider.value);
+            
+            // Update cube position and rotation
+            if (cube) {
+                cube.position.set(cubePosition.x, cubePosition.y, cubePosition.z);
+                cube.rotation.set(
+                    THREE.MathUtils.degToRad(cubeRotation.x),
+                    THREE.MathUtils.degToRad(cubeRotation.y),
+                    THREE.MathUtils.degToRad(cubeRotation.z)
+                );
+            }
+            
+            // Update display values
+            xValue.textContent = cubePosition.x.toFixed(1);
+            yValue.textContent = cubePosition.y.toFixed(1);
+            zValue.textContent = cubePosition.z.toFixed(1);
+            rxValue.textContent = cubeRotation.x + "°";
+            ryValue.textContent = cubeRotation.y + "°";
+            rzValue.textContent = cubeRotation.z + "°";
+            
+            updateDisplay();
+        }
+        
+        // Add event listeners to sliders
+        xSlider.addEventListener('input', updateCubeFromSliders);
+        ySlider.addEventListener('input', updateCubeFromSliders);
+        zSlider.addEventListener('input', updateCubeFromSliders);
+        rxSlider.addEventListener('input', updateCubeFromSliders);
+        rySlider.addEventListener('input', updateCubeFromSliders);
+        rzSlider.addEventListener('input', updateCubeFromSliders);
+        
+        // Control buttons
+        document.getElementById('reset-view').addEventListener('click', () => {
+            controls.reset();
+            camera.position.set(0, 5, 15);
+            camera.lookAt(0, 0, 0);
+            controls.update();
+        });
+        
+        document.getElementById('toggle-wireframe').addEventListener('click', () => {
+            wireframe = !wireframe;
+            cube.traverse((child) => {
+                if (child.isLineSegments) {
+                    child.material.opacity = wireframe ? 1.0 : 0.3;
+                }
+                if (child.isMesh && child !== cube) {
+                    child.visible = !wireframe;
+                }
+            });
+            document.getElementById('toggle-wireframe').innerHTML = 
+                wireframe ? '<i class="fas fa-cube"></i> Solid View' : '<i class="fas fa-th"></i> Wireframe';
+        });
+        
+        document.getElementById('toggle-axes').addEventListener('click', () => {
+            axesHelper.visible = !axesHelper.visible;
+            document.getElementById('toggle-axes').innerHTML = 
+                axesHelper.visible ? '<i class="fas fa-ban"></i> Hide Axes' : '<i class="fas fa-arrows-alt"></i> Show Axes';
+        });
+        
+        document.getElementById('toggle-grid').addEventListener('click', () => {
+            gridHelper.visible = !gridHelper.visible;
+            document.getElementById('toggle-grid').innerHTML = 
+                gridHelper.visible ? '<i class="fas fa-ban"></i> Hide Grid' : '<i class="fas fa-border-all"></i> Show Grid';
+        });
+        
+        document.getElementById('toggle-auto-rotate').addEventListener('click', () => {
+            autoRotate = !autoRotate;
+            document.getElementById('toggle-auto-rotate').innerHTML = 
+                autoRotate ? '<i class="fas fa-stop"></i> Stop Rotation' : '<i class="fas fa-redo-alt"></i> Auto-Rotate';
+        });
+        
+        // Initialize Three.js when visualization tab is active
+        const visualizationTab = document.querySelector('[data-target="visualization"]');
+        visualizationTab.addEventListener('click', () => {
+            // Initialize Three.js if not already initialized
+            if (!renderer) {
+                setTimeout(initThreeJS, 100); // Small delay to ensure DOM is ready
+            }
+        });
+        
+        // Initialize display
+        updateCubeFromSliders();
+        
+        // Initialize Three.js if visualization tab is active on load
+        if (window.location.hash === '#visualization') {
+            setTimeout(initThreeJS, 100);
+        }
+    </script>
+</body>
+</html>
